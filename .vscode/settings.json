@@ -1,0 +1,14 @@
+{
+    "python.pythonPath": "C:\\Users\\roberttk\\.conda\\envs\\bst2\\python.exe",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./tests",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.linting.enabled": true
+}

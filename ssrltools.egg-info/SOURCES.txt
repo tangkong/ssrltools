@@ -1,0 +1,6 @@
+setup.py
+ssrltools.egg-info/PKG-INFO
+ssrltools.egg-info/SOURCES.txt
+ssrltools.egg-info/dependency_links.txt
+ssrltools.egg-info/not-zip-safe
+ssrltools.egg-info/top_level.txt

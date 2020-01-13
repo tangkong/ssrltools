@@ -1,0 +1,32 @@
+Attempting LivePlot, basic plotting
+stage: (SynGauss(name='det1', value=5.0, timestamp=1575595788.943594)), (), {}
+stage: (SynGauss(name='det2', value=1.764993805169191, timestamp=1575595788.943594)), (), {}
+open_run: (None), (), {'detectors': ['det1', 'det2'], 'num_points': 1, 'num_intervals': 0, 'plan_args': {'detectors': ["SynGauss(name='det1', value=5.0, timestamp=1575595788.943594)", "SynGauss(name='det2', value=1.764993805169191, timestamp=1575595788.943594)"], 'num': 1}, 'plan_name': 'count', 'hints': {'dimensions': [(('time',), 'primary')]}}
+Transient Scan ID: 1     Time: 2019-12-05 17:29:48
+Persistent Unique Scan ID: 'e112c8dc-2b3a-4448-bd31-ad9f1ca2dd24'
+checkpoint: (None), (), {}
+trigger: (SynGauss(name='det1', value=5.0, timestamp=1575595788.943594)), (), {'group': 'trigger-462183'}
+trigger: (SynGauss(name='det2', value=1.764993805169191, timestamp=1575595788.943594)), (), {'group': 'trigger-462183'}
+wait: (None), (), {'group': 'trigger-462183'}
+create: (None), (), {'name': 'primary'}
+read: (SynGauss(name='det1', value=5.0, timestamp=1575595788.9895875)), (), {}
+read: (SynGauss(name='det2', value=1.764993805169191, timestamp=1575595788.9915853)), (), {}
+save: (None), (), {}
+New stream: 'primary'
++-----------+------------+
+|   seq_num |       time |
++-----------+------------+
+|         1 | 17:29:49.0 |
+close_run: (None), (), {'exit_status': None, 'reason': None}
++-----------+------------+
+generator count ['e112c8dc'] (scan num: 1)
+
+
+
+unstage: (SynGauss(name='det2', value=1.764993805169191, timestamp=1575595788.9915853)), (), {}
+unstage: (SynGauss(name='det1', value=5.0, timestamp=1575595788.9895875)), (), {}
+
+
+
+at emit for normal det
+    documentNames.descriptor: 'descriptor'
