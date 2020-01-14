@@ -13,12 +13,12 @@ from pathlib import Path
 import numpy as np
 
 
-# Set up a RunEngine and use metadata backed by a sqlite file.
+# Set up a RunEngine and use metadata backed by a mongo databse l.
 from bluesky import RunEngine
 from ssrltools.utils import PersistentDict
 RE = RunEngine({})
 RE.md = PersistentDict(str(Path(
-        '~\\Desktop\\SLAC_RA\\bluesky-dev\\ssrltools\\fstore').expanduser()))
+        '~\\Desktop\\SLAC_RA\\bluesky-dev\\ssrltools\\fstore\\tmp').expanduser()))
 
 # Set up SupplementalData.
 from bluesky import SupplementalData
@@ -40,13 +40,13 @@ except RuntimeError as e:
 RE.subscribe(db.insert)
 
 # Add a progress bar.
-from bluesky.utils import ProgressBarManager
-pbar_manager = ProgressBarManager()
-RE.waiting_hook = pbar_manager
+# from bluesky.utils import ProgressBarManager
+# pbar_manager = ProgressBarManager()
+# RE.waiting_hook = pbar_manager
 
 # Register bluesky IPython magics.
-from bluesky.magics import BlueskyMagics
-get_ipython().register_magics(BlueskyMagics)
+# from bluesky.magics import BlueskyMagics
+# get_ipython().register_magics(BlueskyMagics)
 
 # Set up the BestEffortCallback.
 from bluesky.callbacks.best_effort import BestEffortCallback

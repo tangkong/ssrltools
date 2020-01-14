@@ -31,6 +31,8 @@ db = Broker.named('mongoConfig')
 #databroker.assets.utils.install_sentinels(db.reg.config, version=1)
 db_UID = RE.subscribe(db.insert)
 
+import matplotlib.pyplot as plt
+plt.ion()
 
 # Basic detector simulations
 from ophyd.sim import det, motor, det1, det2
@@ -41,7 +43,7 @@ dets = [det1, det2]
 
 # ========================================================================
 # Try plotting some stuff
-if False:
+if True:
     print('Attempting LivePlot, basic plotting')    
     RE(scan([det], motor, -5, 5, 10), LivePlot('det', 'motor'))
 
@@ -84,7 +86,7 @@ if False:
     
 # =============================================================================
 # Play array simulator
-if True:
+if False:
     from ophyd.sim import motor1, motor2
     from ssrltools.sim import ArraySynGauss
     
