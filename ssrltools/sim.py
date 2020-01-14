@@ -55,70 +55,15 @@ import os
 import numpy as np
 import uuid
 
-class ArraySynGauss(SynSignal):
+class ArraySynSignal(SynSignal):
     """
     Base class for synthetic array signals. 
     Same interface as a normal ArraySignal, but with simulated data and 
-    ? dummy filestore ?
-    
-    Example
-    -------
-    motor1 = SynAxis(name='motor1')
-    motor2 = SynAxis(name='motor2')
-    det = SynGauss('det', motor1, 'motor1', motor2, 'motor2', 
-                   center1=0, center2=0, Imax=1, sigma1=1, sigma2=1)
+    filestore
     """
-    
-    def __init__(self, name, motor1, motor_field1, motor2, motor_field2, 
-                 center1, center2, Imax, sigma1=1, sigma2=2,
-                 noise=None, random_state=None, 
-                 size=5, pt_density=5, noise_multiplier=1, **kwargs):
-        if noise not in ('poisson', 'uniform', None):
-            raise ValueError("Noise must be one of 'poisson', 'uniform', None")
-            
-        self._motor1 = motor1
-        self._motor2 = motor2
-        self.__name__ = name
-        
-        if random_state is None:
-            random_state = np.random
-            
-        # Prepare for resource factory dealings
-        self._last_ret = None
-        self._asset_docs_cache = []
-                    
-        # Function to simulate calls to pv
-        def func():
-            """
-            2D gaussian signal, centered around center1, center2
-            Assume image is square
+    _asset_docs_cache = []
+    _last_ret = None
 
-            Returns
-            -------
-            Array imitating image   
-
-            """
-            m1 = motor1.read()[motor_field1]['value']
-            m2 = motor2.read()[motor_field2]['value']
-            
-            # generate mesh for evauation
-            x = np.linspace(m1-size/2, m1+size/2, pt_density)
-            y = np.linspace(m2-size/2, m2+size/2, pt_density)
-            
-            xx, yy = np.meshgrid(x, y, sparse=True)
-            
-            v = Imax * np.exp(-( ((xx-center1)**2 / (2*sigma1**2)) +  \
-                                 ((yy-center2)**2 / (2*sigma2**2)) ))
-            if noise == 'poisson':
-                v = int(random_state.poission(np.round(v), 1))
-            elif noise == 'uniform':
-                v += random_state.uniform(-1, 1) * noise_multiplier
-        
-            return v
-        
-        super().__init__(func=func, name=name, **kwargs)
-        # Sets self.value to func evaluation. 
-        
     def trigger(self):
         # not running at the moment.... but super.trigger() is.  
         tmpRoot = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore'
@@ -181,3 +126,60 @@ class ArraySynGauss(SynSignal):
         for item in items:
             yield item
 
+class ArraySynGauss(ArraySynSignal):
+    """
+    Output a 2D Gaussian spot at centered at motor position.  
+
+    Example
+    -------
+    motor1 = SynAxis(name='motor1')
+    motor2 = SynAxis(name='motor2')
+    det = SynGauss('det', motor1, 'motor1', motor2, 'motor2', 
+                   center1=0, center2=0, Imax=1, sigma1=1, sigma2=1)
+    """
+    def __init__(self, name, motor1, motor_field1, motor2, motor_field2, 
+                 center1, center2, Imax, sigma1=1, sigma2=2,
+                 noise=None, random_state=None, 
+                 size=5, pt_density=5, noise_multiplier=1, **kwargs):
+        if noise not in ('poisson', 'uniform', None):
+            raise ValueError("Noise must be one of 'poisson', 'uniform', None")
+            
+        self._motor1 = motor1
+        self._motor2 = motor2
+        self.__name__ = name
+        
+        if random_state is None:
+            random_state = np.random
+                    
+        # Function to simulate calls to pv
+        def func():
+            """
+            2D gaussian signal, centered around center1, center2
+            Assume image is square
+
+            Returns
+            -------
+            Array imitating image
+
+            """
+            m1 = motor1.read()[motor_field1]['value']
+            m2 = motor2.read()[motor_field2]['value']
+            
+            # generate mesh for evauation
+            x = np.linspace(m1-size/2, m1+size/2, pt_density)
+            y = np.linspace(m2-size/2, m2+size/2, pt_density)
+            
+            xx, yy = np.meshgrid(x, y, sparse=True)
+            
+            v = Imax * np.exp(-( ((xx-center1)**2 / (2*sigma1**2)) +  \
+                                 ((yy-center2)**2 / (2*sigma2**2)) ))
+            if noise == 'poisson':
+                v = int(random_state.poission(np.round(v), 1))
+            elif noise == 'uniform':
+                v += random_state.uniform(-1, 1) * noise_multiplier
+        
+            return v
+        
+        super().__init__(func=func, name=name, **kwargs)
+        # Sets self.value to func evaluation. 
+        

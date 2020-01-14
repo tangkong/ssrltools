@@ -16,6 +16,7 @@ from ophyd.signal import EpicsSignal
 from ophyd.areadetector.filestore_mixins import resource_factory
 
 from ssrltools.devices import ShutterBase
+from ssrltools.sim import ArraySynSignal
 import time
 
 p_x = SynAxis(name='plate_x', labels={'motors'})
@@ -123,7 +124,7 @@ class SynFilters(Device):
 # In real operation, moving motors/monos will affect detector results.
 # For simulated beamline, need to tie components together
 
-class ArraySynLocator(SynSignal):
+class ArraySynLocator(ArraySynSignal):
     """
     Base class for synthetic array signals. 
     Same interface as a normal ArraySignal, but with simulated data and 
@@ -154,11 +155,7 @@ class ArraySynLocator(SynSignal):
         
         if random_state is None:
             random_state = np.random
-            
-        # Prepare for resource factory
-        self._last_ret = None
-        self._asset_docs_cache = []
-                    
+                                
         # Function to simulate calls to pv
         def func():
             """
@@ -191,55 +188,3 @@ class ArraySynLocator(SynSignal):
         
         super().__init__(func=func, name=name, **kwargs)
         # Sets self.value to func evaluation. 
-        
-    def trigger(self):
-        tmpRoot = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore'
-        tmpPath = '\\tmp'
-        os.makedirs(tmpRoot+tmpPath, exist_ok=True)
-        st = super().trigger() # re-evaluates self._func, puts into value
-        # Returns NullType
-        ret = super().read()    # Signal.read() exists, not SynSignal.read()
-        # But using Signal.read() does not allow uid's to be passed into mem.
-        val = ret[self.name]['value']
-        
-        resource, datum_factory = resource_factory(
-                spec='npy',
-                root=tmpRoot,
-                resource_path=tmpRoot + f'\\tmp\\{uuid.uuid4()}.npy',
-                resource_kwargs={},
-                path_semantics='windows')
-        datum = datum_factory({})
-        
-        self._asset_docs_cache.append(('resource', resource))
-        self._asset_docs_cache.append(('datum', datum))
-        fpath = Path(resource['root']) / resource['resource_path']
-        np.save(fpath, val)
-        
-        # replace 'value' in read dict with some datum id
-        ret[self.name]['value'] = datum['datum_id']
-        self._last_ret = ret
-        return st
-    
-    def describe(self):
-        ret = super().describe()
-        ret[self.name]['external'] = 'FILESTORE:'
-        return ret
-    
-    def read(self):
-        '''Put the status of the signal into a simple dictionary format
-        for data acquisition
-
-        Returns
-        -------
-            dict
-        '''
-        if self._last_ret is not None:
-            return self._last_ret
-        else: # If detector has not been triggered already
-            raise Exception('read before being triggered')
-
-    def collect_asset_docs(self):
-        items = list(self._asset_docs_cache)
-        self._asset_docs_cache.clear()
-        for item in items:
-            yield item
