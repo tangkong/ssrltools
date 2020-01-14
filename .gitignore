@@ -2,3 +2,5 @@ fstore/
 notes/
 __pycache__/
 .vscode/
+ssrltools/__pycache__/
+*.pyc
