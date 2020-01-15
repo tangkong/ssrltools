@@ -86,7 +86,7 @@ if False:
     
 # =============================================================================
 # Play array simulator
-if True:
+if False:
     from ophyd.sim import motor1, motor2
     from ssrltools.sim import ArraySynGauss
     
@@ -116,3 +116,10 @@ if True:
     #print('running stub plan')
     #RE(stub_plan([areaDet], motor))
     hdr = db[-1].table(fill=True)
+
+# Test meshcirc ================================================================
+if True:
+    from ophyd.sim import motor1, motor2, det
+    from ssrltools.plans import meshcirc
+    RE(meshcirc([det], motor1, 1, 10, 10, motor2, 1, 10, 10, 7))
+    
