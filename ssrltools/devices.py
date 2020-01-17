@@ -25,6 +25,7 @@ from ophyd.signal import EpicsSignal, EpicsSignalBase
 from ophyd.areadetector import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.areadetector.detectors import DetectorBase
 from ophyd.areadetector.filestore_mixins import resource_factory
+from ophyd.filestore_mixins import FileStoreTIFFIterativeWrite
 
 
 class ArraySignal(EpicsSignalBase):
@@ -259,6 +260,8 @@ class ShutterBase(Device):
 class DexelaCam(CamBase):
     """
     Connect to all PV's except for image array PV
+
+    Instantiating as a component will prepend the prefix provided at init to PV name
     """
     serial_number = Cpt(EpicsSignal, 'DEXSerialNumber')
     binning_mode = Cpt(SignalWithRBV, 'DEXBinningMode')
@@ -296,14 +299,33 @@ class DexelaCam(CamBase):
     defect_map_file = Cpt(EpicsSignal, 'DEXDefectMapFile', string=True)
     load_defect_map_file = Cpt(EpicsSignal, 'DEXLoadDefectMapFile')
 
-class DexelaDetector(DetectorBase):
+class DexelaDetector(AreaDetector):
     """
+    Dexela Detector class. 
+    AreaDetector init takes a prefix which gets passed through to DexelaCam class
+
     Example:
 
     class MyDet(SingleTrigger, AreaDetector):
         pass
 
     prefix = 'dexela1'
-    det = MyDet(prefix)
+    det = MyDet(prefix, name)
     """
-    cam = Cpt(DexelaCam, 'cam1:')
+    # PV's within DexelaCam are labeled "{prefix}cam1:{PVname}"
+    cam = Cpt(DexelaCam, 'cam1:', 
+                read_attrs=[], 
+                configuration_attrs=['image_mode', 'trigger_mode',
+                                     'acquire_time', 'acquire_period']
+            )
+
+class DexelaDet15(SingleTrigger, DexelaDetector):
+    """
+    Ultimate class for Dexela Detector on SSRL BL 1-5
+
+    det = DexelaDet15(prefix)
+    """
+    write_path = '~/tmpFileStore/'
+    file_plugin = Cpt(FileStoreTIFFIterativeWrite, write_path_template=write_path)
+    # Could add more attributes to file_plugin
+    #could add stage behavior
