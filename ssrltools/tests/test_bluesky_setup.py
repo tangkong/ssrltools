@@ -28,7 +28,7 @@ class BSTests(unittest.TestCase):
         RE.subscribe(bec)
         
         from databroker import Broker
-        db = Broker.named('temp')
+        db = Broker.named('mongoConfig')
         RE.subscribe(db.insert)
         
         return RE, db
@@ -72,11 +72,12 @@ class BSTests(unittest.TestCase):
         """
         Test ophyd import and basic sim functionality
         """
-        from ophyd.sim import det, motor
+        from ophyd.sim import hw
+        hw = hw()
+        det = hw.det
+        motor = hw.motor
 
-        self.assertEqual(det.get(), 1.0)
-        det.put(5)
-        self.assertEqual(det.get(), 5.0)
+        self.assertEqual(det.read()['det']['value'], 1.0)
 
         self.assertEqual(motor.read()['motor']['value'], 0)
         motor.set(9.5)
@@ -97,6 +98,26 @@ class BSTests(unittest.TestCase):
         val = head.table()['det1'][1]
         
         self.assertEqual(val, 5.0)
+
+
+    def test_ssrl_sims(self):
+        """
+        Test custom built simulation tools for SSRL.  
+        """
+
+        RE, db = self.setupRE()
+        from ssrltools.sim import ArraySynGauss
+
+        # TODO: Write the test
+
+    def test_ssrl_plans(self):
+        """
+        Test SSRL plans with simulated detectors
+        """
+
+        # TODO: Write the test
+
+    
 # Run unit tests
 
 if __name__ == '__main__':
