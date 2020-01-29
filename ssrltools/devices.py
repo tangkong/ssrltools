@@ -24,8 +24,8 @@ from ophyd import AreaDetector, SingleTrigger
 from ophyd.signal import EpicsSignal, EpicsSignalBase
 from ophyd.areadetector import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.areadetector.detectors import DetectorBase
-from ophyd.areadetector.filestore_mixins import resource_factory
-from ophyd.filestore_mixins import FileStoreTIFFIterativeWrite
+from ophyd.areadetector.filestore_mixins import (resource_factory, 
+                                            FileStoreTIFFIterativeWrite)
 
 
 class ArraySignal(EpicsSignalBase):
@@ -326,6 +326,7 @@ class DexelaDet15(SingleTrigger, DexelaDetector):
     det = DexelaDet15(prefix)
     """
     write_path = '~/tmpFileStore/'
-    file_plugin = Cpt(FileStoreTIFFIterativeWrite, write_path_template=write_path)
+    file_plugin = Cpt(FileStoreTIFFIterativeWrite, 
+                        write_path_template=write_path)
     # Could add more attributes to file_plugin
-    #could add stage behavior
+    # could add stage behavior
