@@ -9,6 +9,8 @@ import numpy as np
 from ophyd import Signal
 from ophyd.sim import SynSignal #reads namespace of simulated motors, detectors
 
+import tifffile
+
 def testModule():
     return 9
 
@@ -63,6 +65,7 @@ class ArraySynSignal(SynSignal):
     """
     _asset_docs_cache = []
     _last_ret = None
+    point_number = 0
 
     def trigger(self):
         # not running at the moment.... but super.trigger() is.  
@@ -75,18 +78,27 @@ class ArraySynSignal(SynSignal):
         # But using Signal.read() does not allow uid's to be passed into mem.
         val = ret[self.name]['value']
         
+        # AD_TIFF handler generates filename by populating template
+        # self.template % (self.path, self.filename, self.point_number)
+        self.point_number += 1 
         resource, datum_factory = resource_factory(
-                spec='npy',
+                spec='AD_TIFF',
                 root=tmpRoot,
-                resource_path=tmpRoot + f'\\tmp\\{uuid.uuid4()}.npy',
-                resource_kwargs={},
+                resource_path=tmpRoot + '\\tmp\\',
+                resource_kwargs={'template': '%s%s_%d.tiff' , 
+                                    'filename': f'{uuid.uuid4()}'},
                 path_semantics='windows')
-        datum = datum_factory({})
+        datum = datum_factory({'point_number': self.point_number})
         
         self._asset_docs_cache.append(('resource', resource))
         self._asset_docs_cache.append(('datum', datum))
-        fpath = Path(resource['root']) / resource['resource_path']
-        np.save(fpath, val)
+
+        fname = (resource['resource_kwargs']['filename'] 
+                    + f'_{self.point_number}.tiff')
+        fpath = Path(resource['root']) / resource['resource_path'] / fname
+
+        # for tiff spec
+        tifffile.imsave(fpath, val)
         
         # replace 'value' in read dict with some datum id
         ret[self.name]['value'] = datum['datum_id']
