@@ -5,4 +5,5 @@ __pycache__/
 ssrltools/__pycache__/
 *.pyc
 IOC/
-ssrltools.egg-info/
+*.egg-info/
+*.egg
