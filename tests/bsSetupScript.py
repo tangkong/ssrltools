@@ -15,15 +15,19 @@ from bluesky import RunEngine
 RE = RunEngine({})
     
 # install kickers, callbacks
+from ssrltools.callbacks import doc_contents, own_CB
 bec = BestEffortCallback()
 bec_UID = RE.subscribe(bec)
+# Debugging callbacks
+ownCB_UID = RE.subscribe(own_CB())
+cont_UID = RE.subscribe(doc_contents)
 
 # install_kicker()
 
 # Set up data storage
 import databroker
 from databroker import Broker # has issues with Cython imagecodecs?...
-db = Broker.named('mongoConfig')
+db = Broker.named('mongoConfig-h5')
 # install sentinels
 #databroker.assets.utils.install_sentinels(db.reg.config, version=1)
 db_UID = RE.subscribe(db.insert)
@@ -61,9 +65,9 @@ if False:
 if False:
     RE.unsubscribe(bec_UID)
     
-    from ssrltools.callbacks import ownCB
+    from ssrltools.callbacks import own_CB
     
-    ownCB_uid = RE.subscribe(ownCB())
+    ownCB_uid = RE.subscribe(own_CB())
     RE(count(dets))
 
 
@@ -118,10 +122,12 @@ if True:
     from ssrltools.plans import stub_plan
     #print('running stub plan')
     #RE(stub_plan([areaDet], motor))
-    hdr = db[-1].table(fill=True)
+    #hdr = db[-1].table(fill=True)
 
 # Test meshcirc ================================================================
 if False:
     from ssrltools.plans import meshcirc
     RE(meshcirc([det], motor1, 1, 10, 10, motor2, 1, 10, 10, 7))
 
+if False:
+    hdr = db[-1].table(fill=True)
