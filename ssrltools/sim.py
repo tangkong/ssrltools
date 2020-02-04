@@ -96,7 +96,6 @@ class ArraySynSignal(SynSignal):
         fname = (resource['resource_kwargs']['filename'] 
                     + f'_{self.point_number}.tiff')
         fpath = Path(resource['root']) / resource['resource_path'] / fname
-
         # for tiff spec
         tifffile.imsave(fpath, val)
         
@@ -151,7 +150,7 @@ class ArraySynGauss(ArraySynSignal):
     """
     def __init__(self, name, motor1, motor_field1, motor2, motor_field2, 
                  center1, center2, Imax, sigma1=1, sigma2=2,
-                 noise=None, random_state=None, 
+                 noise='poisson', random_state=None, 
                  size=5, pt_density=5, noise_multiplier=1, **kwargs):
         if noise not in ('poisson', 'uniform', None):
             raise ValueError("Noise must be one of 'poisson', 'uniform', None")
@@ -186,9 +185,9 @@ class ArraySynGauss(ArraySynSignal):
             v = Imax * np.exp(-( ((xx-center1)**2 / (2*sigma1**2)) +  \
                                  ((yy-center2)**2 / (2*sigma2**2)) ))
             if noise == 'poisson':
-                v = int(random_state.poission(np.round(v), 1))
+                v += random_state.poisson(np.mean(v), np.shape(v))
             elif noise == 'uniform':
-                v += random_state.uniform(-1, 1) * noise_multiplier
+                v += random_state.uniform(low=-1, high=1, size=np.shape(v)) * noise_multiplier
         
             return v
         
