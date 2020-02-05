@@ -6,10 +6,14 @@ Simulated hardware for use at SSRL beamlines running Bluesky
 
 """
 import numpy as np
+import random
+
 from ophyd import Signal
 from ophyd.sim import SynSignal #reads namespace of simulated motors, detectors
 
 import tifffile
+import fabio
+
 
 def testModule():
     return 9
@@ -121,12 +125,10 @@ class ArraySynSignal(SynSignal):
         # need to initialize sentinel when starting RunEngine
         # Is ostensibly the same as Signal.read()?...
         if self._last_ret is not None:
-            print('post-trigger read()')
             return self._last_ret
             # return {self.name: {'value': self._last_ret,
             #                     'timestamp': self.timestamp}}
         else: # If detector has not been triggered already
-            print('pre-trigger read()')
             raise Exception('read before being triggered')
             # return {self.name: {'value': self.get(),
             #                      'timestamp': self.timestamp}}
@@ -194,3 +196,33 @@ class ArraySynGauss(ArraySynSignal):
         super().__init__(func=func, name=name, **kwargs)
         # Sets self.value to func evaluation. 
         
+
+class SynImageDetector(ArraySynSignal):
+    """
+    Simulates an area detector by returning an image from file.  
+    """
+    def __init__(self, name, imPath, ext='.tif', **kwargs):
+        self.__name__ = name
+        self.im_path = Path(imPath)
+        if not os.path.exists(self.im_path):
+            raise FileNotFoundError
+        
+        def gen(data):
+            yield from data
+
+        def func():
+            """Return np.ndarray with image data from specified path
+            """
+            if os.path.isfile(self.im_path):
+                print('file found')
+                image = fabio.open(self.im_path)
+                return np.array(image.data)
+            elif os.path.isdir(self.im_path):
+                print('path found')
+                ims = list(self.im_path.glob('*'+ext))
+                i = random.randint(0,len(ims))
+                image = fabio.open(ims[i])
+
+                return np.array(image.data)
+
+        super().__init__(func=func, name=name, **kwargs)
