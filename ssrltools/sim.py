@@ -207,9 +207,6 @@ class SynImageDetector(ArraySynSignal):
         if not os.path.exists(self.im_path):
             raise FileNotFoundError
         
-        def gen(data):
-            yield from data
-
         def func():
             """Return np.ndarray with image data from specified path
             """
