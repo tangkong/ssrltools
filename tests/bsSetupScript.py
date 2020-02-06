@@ -15,12 +15,12 @@ from bluesky import RunEngine
 RE = RunEngine({})
     
 # install kickers, callbacks
-from ssrltools.callbacks import doc_contents, own_CB
+from ssrltools.callbacks import doc_contents, debugCB
 bec = BestEffortCallback()
 bec_UID = RE.subscribe(bec)
 # Debugging callbacks
-ownCB_UID = RE.subscribe(own_CB())
-cont_UID = RE.subscribe(doc_contents)
+#ownCB_UID = RE.subscribe(debugCB())
+#cont_UID = RE.subscribe(doc_contents)
 
 # install_kicker()
 
@@ -94,7 +94,7 @@ if False:
     
 # =============================================================================
 # Play array simulator
-if True:
+if False:
     from ssrltools.sim import ArraySynGauss
     
     # Currently works with mongoDB, but not sql.  Can't bind value field
@@ -131,3 +131,10 @@ if False:
 
 if False:
     hdr = db[-1].table(fill=True)
+
+if True: 
+    from ssrltools.sim import SynImageDetector as SIDet
+    imPath = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore\\k3_012918_1_24x24_t45b_0248.tif'
+    det = SIDet('imDet', imPath)
+
+    RE(count([det]))

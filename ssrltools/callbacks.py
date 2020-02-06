@@ -8,16 +8,25 @@ Callbacks for use at SSRL beamlines running Bluesky
 
 from bluesky.callbacks import CallbackBase
 
-class own_CB(CallbackBase):
+class debugCB(CallbackBase):
+    """For debugging documents.  Spits everything to console.
+    """
     def start(self, doc):
         print('>>> start of run <<<  \n')
+        print(doc)
+        print('-----------------------\n')
     
     def event(self, doc):
         #print('name: {}'.format(name))
-        print('>>> data: {} <<< '.format(doc['data']))
-        
+        print('>>> Event <<< ')
+        print(doc)
+        print('-----------------------\n')
+
     def stop(self, doc):
-        print('>>> run completed <<<')
+        print('>>> end of run <<< \n')
+        print(doc)
+        print('-----------------------\n')
+
         
 def doc_contents(key, doc):
     """
