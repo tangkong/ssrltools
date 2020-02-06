@@ -7,3 +7,4 @@ ssrltools/__pycache__/
 IOC/
 *.egg-info/
 *.egg
+tests/bsSetupScript.py
