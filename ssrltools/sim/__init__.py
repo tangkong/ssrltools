@@ -223,3 +223,15 @@ class SynImageDetector(ArraySynSignal):
                 return np.array(image.data)
 
         super().__init__(func=func, name=name, **kwargs)
+
+class SynXspress3(SynSignal):
+    """
+    Simulates Xspress3 Energy Discerning detector
+    """
+    def __init__(self, name, **kwargs):
+        self.__name__ = name
+
+        def func():
+            return 1
+
+        super(SynXspress3, self).__init__(func=func, name=name, **kwargs)
