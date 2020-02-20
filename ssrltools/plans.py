@@ -77,7 +77,8 @@ def stub_plan(detectors, motor):
     return (yield from core())
 
 
-def meshcirc(detectors, motor1, s1, f1, int1, mot2, s2, f2, int2, radius, md=None):
+def meshcirc(detectors, motor1, s1, f1, int1, mot2, s2, f2, int2, 
+            radius, md=None):
     """
     Scan points in a mesh, including only coordinates inside the radius
     Hooks bluesky.plans.grid_scan
