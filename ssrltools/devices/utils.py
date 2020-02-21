@@ -21,7 +21,6 @@ def makedirs(path, mode=0o777):
     ret.append(path)
     return ret
 
-
 def ordered_dict_move_to_beginning(od, key):
     if key not in od:
         return
@@ -32,7 +31,6 @@ def ordered_dict_move_to_beginning(od, key):
     od.clear()
     od[key] = value
     od.update(items)
-
 
 def make_filename_add_subdirectory(fn, read_path, write_path, *,
                                    make_directories=True,
