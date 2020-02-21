@@ -23,7 +23,6 @@ from ophyd.areadetector.filestore_mixins import FileStorePluginBase
 from ophyd.areadetector.plugins import HDF5Plugin
 from ophyd.areadetector import ADBase
 from ophyd.device import (BlueskyInterface, Staged)
-from ophyd.status import DeviceStatus
 from ophyd.sim import NullStatus  # TODO: remove after complete/collect are defined
 
 from hxntools.detectors.xspress3 import (XspressTrigger, Xspress3Detector, 
