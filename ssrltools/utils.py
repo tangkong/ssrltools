@@ -35,3 +35,16 @@ class PersistentDict(zict.Func):
             file,
             object_hook=msgpack_numpy.decode,
             raw=False)
+
+            
+from caproto.server.conversion import ophyd_device_to_caproto_ioc as o2c
+basep = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore\\'
+
+def ophyd_to_caproto_to_file(device, savepath=basep):
+    ioc = o2c(device)
+
+    for key in ioc.keys():
+        with open(savepath + str(key) + '.py', 'w+') as fp:
+            for ln in ioc[key]:
+                fp.write(ln)
+                fp.write('\n')
