@@ -110,8 +110,40 @@ class SynHiTpDet(SynSignal):
 
         def func():
             """
-            Returns tuple with motor positions and random int from 1-10
+            Returns random int from 1-10
             """
-            return (motorx.position, motory.position, random.randint(1, 10))
+            return random.randint(1, 10)
 
         super().__init__(func=func, name=name, **kwargs)
+
+    def trigger(self):
+        print('triggered')
+        ret = super().trigger()
+        return ret
+
+def _per_grid_step_thresh(threshold, radius):
+    """
+    Hook function for dumb threshold tests
+    .... Moves before triggering.  So if you have a threshold set, 
+        once the threshold has caused it to pass, it won't trigger again, 
+        causing all to pass. 
+
+        this is probably desirable behavior, as the detector doesn't change  
+        before you move to the position
+    """  
+    def per_step_fn(detectors, step, pos_cache):
+        vals = list(step.values())
+        pos_rad = sum(map(lambda x: x*x, list(vals)))
+        pt_past_radius = (pos_rad > radius*radius)
+        over_thresh = False
+        for det in detectors:
+            if det.value > threshold:
+                #print(f'threshold greater than allowed: {det.value}')
+                over_thresh = True
+
+        if pt_past_radius or over_thresh:
+            pass
+        else: 
+            yield from bps.one_nd_step(detectors, step, pos_cache)
+
+    return per_step_fn
