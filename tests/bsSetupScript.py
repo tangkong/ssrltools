@@ -65,9 +65,9 @@ if False:
 if False:
     RE.unsubscribe(bec_UID)
     
-    from ssrltools.callbacks import own_CB
+    from ssrltools.callbacks import debugCB
     
-    ownCB_uid = RE.subscribe(own_CB())
+    ownCB_uid = RE.subscribe(debugCB())
     RE(count(dets))
 
 
@@ -132,9 +132,27 @@ if False:
 if False:
     hdr = db[-1].table(fill=True)
 
-if True: 
+# Test Simulated image detector, loading images then reading them back
+if False: 
     from ssrltools.sim import SynImageDetector as SIDet
     imPath = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore\\k3_012918_1_24x24_t45b_0248.tif'
     det = SIDet('imDet', imPath)
 
     RE(count([det]))
+
+# Test caproto IOC, connect to IOC and try to read image
+if False:
+    from ssrltools.devices.dexela import DexelaDet15 as DEXdet
+
+    det = DEXdet('simBL:dexela', name='dexela')
+
+    RE(count([det]))
+
+if True: 
+    from ssrltools.sim.hitp import per_grid_step_thresh
+    from ssrltools.sim.hitp import SynHiTpDet
+    SynDet = SynHiTpDet('synDet', motor1, motor2)
+
+    from bluesky.plans import grid_scan
+    RE(grid_scan([SynDet], motor1, 1, 10, 10, motor2, 1, 10, 10, True,
+                    per_step=per_grid_step_thresh(11, 6)))
