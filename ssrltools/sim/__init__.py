@@ -196,7 +196,6 @@ class ArraySynGauss(ArraySynSignal):
         super().__init__(func=func, name=name, **kwargs)
         # Sets self.value to func evaluation. 
         
-
 class SynImageDetector(ArraySynSignal):
     """
     Simulates an area detector by returning an image from file.  
