@@ -9,7 +9,7 @@ def makedirs(path, mode=0o777):
     if not path or os.path.exists(path):
         return []
 
-    head, tail = os.path.split(path)
+    head, _ = os.path.split(path)
     ret = makedirs(head, mode)
     try:
         os.mkdir(path)
