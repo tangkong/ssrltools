@@ -401,6 +401,27 @@ class Xspress3ROI(ADBase):
         self.ev_low.put(ev_low)
         self.enable.put(enable)
 
+def make_rois(rois):
+    defn = OrderedDict()
+    for roi in rois:
+        attr = 'roi{:02d}'.format(roi)
+        #             cls          prefix                kwargs
+        defn[attr] = (Xspress3ROI, 'ROI{}:'.format(roi), dict(roi_num=roi))
+        # e.g., device.rois.roi01 = Xspress3ROI('ROI1:', roi_num=1)
+
+        # AreaDetector NDPluginAttribute information
+        attr = 'ad_attr{:02d}'.format(roi)
+        defn[attr] = (Xspress3ROISettings, 'ROI{}:'.format(roi),
+                      dict(read_attrs=[]))
+        # e.g., device.rois.roi01 = Xspress3ROI('ROI1:', roi_num=1)
+
+        # TODO: 'roi01' and 'ad_attr_01' have the same prefix and could
+        # technically be combined. Is this desirable?
+
+    defn['num_rois'] = (Signal, None, dict(value=len(rois)))
+    # e.g., device.rois.num_rois.get() => 16
+    return defn
+
 class Xspress3Channel(ADBase):
     roi_name_format = 'Det{self.channel_num}_{roi_name}'
     roi_sum_name_format = 'Det{self.channel_num}_{roi_name}_sum'
@@ -685,24 +706,3 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
         self._asset_docs_cache.clear()
         for item in items:
             yield item
-
-def make_rois(rois):
-    defn = OrderedDict()
-    for roi in rois:
-        attr = 'roi{:02d}'.format(roi)
-        #             cls          prefix                kwargs
-        defn[attr] = (Xspress3ROI, 'ROI{}:'.format(roi), dict(roi_num=roi))
-        # e.g., device.rois.roi01 = Xspress3ROI('ROI1:', roi_num=1)
-
-        # AreaDetector NDPluginAttribute information
-        attr = 'ad_attr{:02d}'.format(roi)
-        defn[attr] = (Xspress3ROISettings, 'ROI{}:'.format(roi),
-                      dict(read_attrs=[]))
-        # e.g., device.rois.roi01 = Xspress3ROI('ROI1:', roi_num=1)
-
-        # TODO: 'roi01' and 'ad_attr_01' have the same prefix and could
-        # technically be combined. Is this desirable?
-
-    defn['num_rois'] = (Signal, None, dict(value=len(rois)))
-    # e.g., device.rois.num_rois.get() => 16
-    return defn
