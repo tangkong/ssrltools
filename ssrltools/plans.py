@@ -198,3 +198,46 @@ def nscan(detectors, *motor_sets, num=11, per_step=None, md=None):
             yield from per_step(detectors, step_cache, pos_cache)
 
     return (yield from inner_scan())
+
+
+def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
+        """
+        Plan for leveling hitp stage.  
+        Assumes:
+            dist_motor is at horz_motor=point1
+            point1 to point2 are on horz_motor axis
+            stage is currently on horz_motor axis
+
+        Usage: 
+            bps.mv(stage.center)
+            level_stage_single(stage.height, stage.plate_y, stage.stage_y, 
+                                            pt1, pt2)
+            bps.mv(stage.center)
+            level_stage_single(stage.height, stage.plate_x, stage.stage_x,
+                                            pt1, pt2)
+            stage.set_all_vert_theta
+        """
+        # Grab initial values
+        yield from bps.mv(horz_motor, point1)
+        # If actual epics detector, need to trigger and read?
+        # Else can just get value
+        v1 = distdet.get()
+        yield from bps.mv(horz_motor, point2)
+        v2 = distdet.get()
+
+        # Some kind of conversion?  Go from laser output to distance?
+
+        threshold = 10.0
+        # Coarse adjustment, move in large steps
+        while (np.abs(v2 - v1) > (threshold * 20)):
+            yield from bps.mv(dist_motor, v2)
+
+            # re-measure points
+            yield from bps.mv(horz_motor, point1)
+            v1 = distdet.get()
+            yield from bps.mv(horz_motor, point2)
+            v2 = distdet.get()
+
+
+
+

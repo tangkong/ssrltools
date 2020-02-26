@@ -1,5 +1,6 @@
 import bluesky.plan_stubs as bps
 from ophyd import EpicsMotor, Device, Component as Cpt
+from ophyd import EpicsSignalRO
 from ophyd.sim import SynAxis, SynSignal
 import pandas as pd 
 from pathlib import Path
@@ -14,6 +15,7 @@ class HiTpStage(Device):
     * Stores sample locations
 
     Simplifies task of aligning and remembering sample positions
+    Instantiate with: HiTpStage('simBL', name='HS')
     """
     #stage x, y
     stage_x = Cpt(EpicsMotor, ':suffix', kind='hinted')
@@ -24,6 +26,9 @@ class HiTpStage(Device):
     plate_y = Cpt(EpicsMotor, ':suffix')
 
     theta = Cpt(EpicsMotor, ':suffix')
+
+    # Laser Range finder?... 
+    height = Cpt(EpicsSignalRO, ':suffix')
 
     # TODO: Figure out how to access component names within the class 
     # Until then, hard code things I guess
@@ -46,32 +51,14 @@ class HiTpStage(Device):
                                     'plate_y': 0, #self.plate_y.position,
                                     'theta':   0 #self.theta.position
                                   }
+        
+        self.center = { 'stage_x': 0,
+                        'stage_y': 0,
+                        'plate_x': 0, #self.plate_x.position,
+                        'plate_y': 0, #self.plate_y.position,
+                        'theta':   0 #self.theta.position
+                      }
         super().__init__(*args, **kwargs)
-
-    def sample_loc_list(self, paired=False):
-        """
-        Returns motor-location list pairs for consumption by bp.list_scan
-        motor1, [m1_loc1, m1_loc2, ...], 
-        motor2, [m2_loc1, m2_loc2, ...], ...
-
-        Can also be formatted as tuples:
-        (m1_loc1, m2_loc1, ... ), (m1_loc2, m2_loc2, ...)
-        """
-        loc_lists = {}
-        for name in self.component_names:
-            loc_lists[name] = []
-
-        for pos in self.sample_locs.values():
-            for motor in pos.keys():
-                loc_lists[motor].append(pos[motor])
-
-        # format as * unpackable args
-        result = []
-        for name in self.component_names:
-            result.append(getattr(self, name))
-            result.append(loc_lists[name])
-
-        return result
 
     def sample(self, index):
         return self.sample_locs[index]
@@ -87,14 +74,62 @@ class HiTpStage(Device):
                                     'theta':   self.theta.position
                                   }
 
-
-    def move_to_sample_plan(self, index):
+    def set_all_vert_theta(self):
         """
-        Plan to move to sample index.  Pass this into the active run engine.
+        After aligning plate and theta, set all sample locations to have
+        same plate_x, plate_y, theta.
+        """
+        for i in range(len(self.sample_locs)):
+            self.sample_locs[i]['theta'] = self.theta.position
+            self.sample_locs[i]['plate_x'] = self.plate_x.position
+            self.sample_locs[i]['plate_y'] = self.plate_y.position
+
+
+    def sample_loc_list(self, index=None):
+        """
+        Returns motor-location list pairs for consumption by bp.list_scan
+        motor1, [m1_loc1, m1_loc2, ...], 
+        motor2, [m2_loc1, m2_loc2, ...], ...
+
+        usage: 
+            stage = HiTpStage('prefix', name='name')
+            RE( bp.list_scan(*stage.sample_loc_list()) )
+
+            OR
+
+            RE( bps.mv(*stage.sample_loc_list(index=1)) )
         """
         result = []
-        for key, val in self.sample_locs[index].items():
-            result.append(getattr(self, key))
-            result.append(val)
-        print(result)
-        yield from bps.mv(*result)
+
+        if not index:
+            loc_lists = {}
+            for name in self.component_names:
+                loc_lists[name] = []
+
+            for pos in self.sample_locs.values():
+                for motor in pos.keys():
+                    loc_lists[motor].append(pos[motor])
+
+            # format as * unpackable args
+            for name in self.component_names:
+                result.append(getattr(self, name))
+                result.append(loc_lists[name])
+
+            return result
+
+        elif index is 'center':
+            for key, val in self.center.items():
+                result.append(getattr(self, key)) # grab motor instance
+                result.append(val) # return value
+
+            return result
+
+        elif isinstance(index, (int, list)): 
+            # return locations from chosen indexes.  Also catches int case
+            indices = list(index)
+            for i in indices:
+                for key, val in self.sample_locs[i].items():
+                    result.append(getattr(self, key))
+                    result.append(val)
+
+            return result
