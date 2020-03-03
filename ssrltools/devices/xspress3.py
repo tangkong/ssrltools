@@ -631,8 +631,6 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
     roi_data = Cpt(PluginBase, 'ROIDATA:')
     channel1 = Cpt(Xspress3Channel, 'C1_', channel_num=1, read_attrs=['rois'])
     channel2 = Cpt(Xspress3Channel, 'C2_', channel_num=2, read_attrs=['rois'])
-    channel3 = Cpt(Xspress3Channel, 'C3_', channel_num=3, read_attrs=['rois'])
-    channel4 = Cpt(Xspress3Channel, 'C4_', channel_num=4, read_attrs=['rois'])
 
     hdf5 = Cpt(Xspress3FileStore, 'HDF5:',
                read_path_template='/ssrl/beamline/data/xspress/%Y/%m/%d/',
@@ -647,7 +645,7 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
                                    'spectra_per_point', 'settings',
                                    'rewindable']
         if read_attrs is None:
-            read_attrs = ['channel1', 'channel2', 'channel3', 'channel4', 'hdf5']
+            read_attrs = ['channel1', 'channel2', 'hdf5']
         super().__init__(prefix, configuration_attrs=configuration_attrs,
                          read_attrs=read_attrs, **kwargs)
 
