@@ -286,7 +286,6 @@ def ev_to_bin(ev):
     '''Convert eV to bin number'''
     return int(ev / 10)
 
-
 def bin_to_ev(bin_):
     '''Convert bin number to eV'''
     return int(bin_) * 10
@@ -538,9 +537,6 @@ class Xspress3Detector(DetectorBase):
     rewindable = Cpt(Signal, value=False,
                      doc='Xspress3 cannot safely be rewound in bluesky')
 
-    # XF:03IDC-ES{Xsp:1}           C1_   ...
-    # channel1 = Cpt(Xspress3Channel, 'C1_', channel_num=1)
-
     data_key = XRF_DATA_KEY
 
     def __init__(self, prefix, *, read_attrs=None, configuration_attrs=None,
@@ -553,10 +549,10 @@ class Xspress3Detector(DetectorBase):
                  **kwargs):
 
         if read_attrs is None:
-            read_attrs = ['channel1', ]
+            read_attrs = ['channel1', 'channel2']
 
         if configuration_attrs is None:
-            configuration_attrs = ['channel1.rois', 'settings']
+            configuration_attrs = ['channel1.rois', 'channel2.rois', 'settings']
 
         super().__init__(prefix, read_attrs=read_attrs,
                          configuration_attrs=configuration_attrs,
@@ -633,9 +629,9 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
     channel2 = Cpt(Xspress3Channel, 'C2_', channel_num=2, read_attrs=['rois'])
 
     hdf5 = Cpt(Xspress3FileStore, 'HDF5:',
-               read_path_template='/ssrl/beamline/data/xspress/%Y/%m/%d/',
-               root='/ssrl/beamline/data/',
-               write_path_template='/ssrl/beamline/data/xspress/%Y/%m/%d/',
+               read_path_template='~/tempdata/xspress3/',
+               root='~/tempdata/xspress3/',
+               write_path_template='~/tempdata/xspress3/',
                )
 
     def __init__(self, prefix, *, configuration_attrs=None, read_attrs=None,
