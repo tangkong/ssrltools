@@ -703,8 +703,8 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
 
 class TestXsp3(XspressTrigger, Xspress3Detector):
     roi_data = Cpt(PluginBase, 'ROIDATA:')
-    channel1 = Cpt(Xspress3ROI, 'C1_', channel_num=1, read_attrs=['rois'])
-    channel2 = Cpt(Xspress3ROI, 'C2_', channel_num=2, read_attrs=['rois'])
+    channel1 = Cpt(Xspress3Channel, 'C1_', channel_num=1, read_attrs=['rois'])
+    channel2 = Cpt(Xspress3Channel, 'C2_', channel_num=2, read_attrs=['rois'])
 
     # Ignoring filestore for now
     def __init__(self, prefix, *, configuration_attrs=None, read_attrs=None,
