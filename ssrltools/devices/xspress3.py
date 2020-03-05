@@ -676,7 +676,7 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
         num_frames = self.hdf5.num_captured.get()
 
         for frame_num in range(num_frames):
-            for channel_num in self.hdf5.channels:  # Channels (1, 2, 3, 4) as of 12/16/2019
+            for channel_num in self.hdf5.channels:  # Channels (1, 2) as of 03/04/2020
                 datum_id = '{}/{}'.format(self.hdf5._resource_uid, next(self._datum_counter))
                 datum = {'resource': self.hdf5._resource_uid,
                          'datum_kwargs': {'frame': frame_num,
@@ -700,3 +700,50 @@ class SSRLXspress3Detector(XspressTrigger, Xspress3Detector):
         self._asset_docs_cache.clear()
         for item in items:
             yield item
+
+class TestXsp3(XspressTrigger, Xspress3Detector):
+    roi_data = Cpt(PluginBase, 'ROIDATA:')
+    channel1 = Cpt(Xspress3ROI, 'C1_', channel_num=1, read_attrs=['rois'])
+    channel2 = Cpt(Xspress3ROI, 'C2_', channel_num=2, read_attrs=['rois'])
+
+    # Ignoring filestore for now
+    def __init__(self, prefix, *, configuration_attrs=None, read_attrs=None,
+                    **kwargs):
+        if configuration_attrs is None:
+            configuration_attrs = ['external_trig', 'total_points', 
+                                    'spectra_per_point', 'settings',
+                                    'rewindable']
+        if read_attrs is None:
+            read_attrs = ['channel1', 'channel2']
+
+        super().__init__(prefix, configuration_attrs=configuration_attrs,
+                         read_attrs=read_attrs, **kwargs)
+
+        self._asset_docs_cache = deque()
+        self._datum_counter = None
+
+    def stop(self):
+        ret = super().stop()
+        return ret
+
+    def stage(self):
+        if self.spectra_per_point.get() != 1:
+            raise NotImplementedError(
+                'multi spectra per point not supported yet')
+        ret = super().stage()
+        self._datum_counter = itertools.count()
+        return ret
+
+    def unstage(self):
+        self.settings.trigger_mode.put(0)
+        super().unstage()
+        self._datum_counter = None
+
+    def complete(self, *args, **kwargs):
+        self._datum_ids = []
+
+        return NullStatus()
+
+    def collect(self):
+        now = ttime.time()
+        return NullStatus()
