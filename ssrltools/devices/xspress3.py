@@ -425,7 +425,7 @@ class Xspress3Channel(ADBase):
     roi_name_format = 'Det{self.channel_num}_{roi_name}'
     roi_sum_name_format = 'Det{self.channel_num}_{roi_name}_sum'
 
-    rois = DDC(make_rois(range(1, 17)))
+    rois = DDC(make_rois(range(1, 4)))
     vis_enabled = Cpt(EpicsSignal, 'PluginControlVal')
 
     def __init__(self, prefix, *, channel_num=None, **kwargs):
