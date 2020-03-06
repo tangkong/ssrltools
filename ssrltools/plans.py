@@ -217,15 +217,23 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
                                             pt1, pt2)
             stage.set_all_vert_theta
         """
+
+        # Conversion from voltage to distance
+        def v2mm(V):
+            """ Convert laser range finder V to mm (calib w/ ims motor) """
+            return V*0.004 - 2000.8
+
         # Grab initial values
         yield from bps.mv(horz_motor, point1)
         # If actual epics detector, need to trigger and read?
         # Else can just get value
-        v1 = distdet.value()
+        v1 = v2mm(distdet.value())
         yield from bps.mv(horz_motor, point2)
-        v2 = distdet.value()
+        v2 = v2mm(distdet.value())
 
         # Some kind of conversion?  Go from laser output to distance?
+
+
 
         threshold = 10.0
         step_size = 5.0
@@ -239,18 +247,18 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
 
             # re-measure points
             yield from bps.mv(horz_motor, point1)
-            v1 = distdet.value()
+            v1 = v2mm(distdet.value())
 
         # Remeasure both
         # Grab initial values
         yield from bps.mv(horz_motor, point1)
         # If actual epics detector, need to trigger and read?
         # Else can just get value
-        v1 = distdet.value()
+        v1 = v2mm(distdet.value())
         yield from bps.mv(horz_motor, point2)
-        v2 = distdet.value()
+        v2 = v2mm(distdet.value())
 
-        # Coarse adjustment, move in large steps
+        # Fine adjustment, move in smaller steps
         while (np.abs(v2 - v1) > (threshold * 2)):
 
             if v1 > v2: # if motor farther from range finder
@@ -260,5 +268,5 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
 
             # re-measure points
             yield from bps.mv(horz_motor, point1)
-            v1 = distdet.value()
+            v1 = v2mm(distdet.value())
 
