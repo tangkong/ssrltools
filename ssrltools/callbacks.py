@@ -8,7 +8,7 @@ Callbacks for use at SSRL beamlines running Bluesky
 
 from bluesky.callbacks import CallbackBase
 
-class debugCB(CallbackBase):
+class _debugCB(CallbackBase):
     """For debugging documents.  Spits everything to console.
     """
     def start(self, doc):
@@ -28,7 +28,7 @@ class debugCB(CallbackBase):
         print('-----------------------\n')
 
         
-def doc_contents(key, doc):
+def _doc_contents(key, doc):
     """
     prints document contents -- use for diagnosing a document stream
     """
