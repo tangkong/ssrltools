@@ -207,6 +207,7 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             dist_motor is at horz_motor=point1
             point1 to point2 are on horz_motor axis
             stage is currently on horz_motor axis
+            distdet is a simple signal.  
 
         Usage: 
             bps.mv(stage.center)
@@ -216,6 +217,9 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             level_stage_single(stage.height, stage.plate_x, stage.stage_x,
                                             pt1, pt2)
             stage.set_all_vert_theta
+
+        Currently distance detector is a laser range finder with simple
+        rbv, so more complicated calls are not necessary. 
         """
 
         # Conversion from voltage to distance
@@ -223,50 +227,32 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             """ Convert laser range finder V to mm (calib w/ ims motor) """
             return V*0.004 - 2000.8
 
-        # Grab initial values
-        yield from bps.mv(horz_motor, point1)
-        # If actual epics detector, need to trigger and read?
-        # Else can just get value
-        v1 = v2mm(distdet.value())
-        yield from bps.mv(horz_motor, point2)
-        v2 = v2mm(distdet.value())
-
-        # Some kind of conversion?  Go from laser output to distance?
-
-
-
-        threshold = 10.0
+        # Iteration parameters
+        thresh = 10.0
         step_size = 5.0
-        # Coarse adjustment, move in large steps
-        while (np.abs(v2 - v1) > (threshold * 20)):
-
-            if v1 > v2: # if motor farther from range finder
-                yield from bps.mvr(dist_motor, step_size*10) # raise motor
-            else: 
-                yield from bps.mvr(dist_motor, -step_size*10)
-
-            # re-measure points
+        iter_limit = 20
+        
+        for thresh_mult in [20, 2]: # two steps, coarse and fine
+            # Grab initial values
             yield from bps.mv(horz_motor, point1)
+            # If actual epics detector, need to trigger and read?
+            # Else can just get value
             v1 = v2mm(distdet.value())
+            yield from bps.mv(horz_motor, point2)
+            v2 = v2mm(distdet.value())
 
-        # Remeasure both
-        # Grab initial values
-        yield from bps.mv(horz_motor, point1)
-        # If actual epics detector, need to trigger and read?
-        # Else can just get value
-        v1 = v2mm(distdet.value())
-        yield from bps.mv(horz_motor, point2)
-        v2 = v2mm(distdet.value())
+            # Coarse adjustment, move in large steps
+            iter_cnt = 0
+            while ((np.abs(v2 - v1) > (thresh * thresh_mult)) 
+                    or (iter_cnt > iter_limit)):
 
-        # Fine adjustment, move in smaller steps
-        while (np.abs(v2 - v1) > (threshold * 2)):
+                if v1 > v2: # if motor farther from range finder
+                    yield from bps.mvr(dist_motor, step_size*thresh_mult/2) # raise motor
+                else: 
+                    yield from bps.mvr(dist_motor, -step_size*thresh_mult/2)
 
-            if v1 > v2: # if motor farther from range finder
-                yield from bps.mvr(dist_motor, step_size) # raise motor
-            else: 
-                yield from bps.mvr(dist_motor, -step_size)
+                # re-measure points for iteration condition
+                yield from bps.mv(horz_motor, point1)
+                v1 = v2mm(distdet.value())
 
-            # re-measure points
-            yield from bps.mv(horz_motor, point1)
-            v1 = v2mm(distdet.value())
-
+                iter_cnt += 1
