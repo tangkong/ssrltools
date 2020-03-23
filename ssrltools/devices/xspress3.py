@@ -230,7 +230,7 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
 
         original_vals = {sig: sig.get() for sig in sigs}
 
-        for sig, val in sigs.item():
+        for sig, val in sigs.items():
             ttime.sleep(0.1) # Being overly cautios here
             set_and_wait(sig, val)
 
