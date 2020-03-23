@@ -22,6 +22,7 @@ from ophyd.areadetector.plugins import HDF5Plugin, PluginBase
 from ophyd.areadetector import ADBase
 from ophyd.device import (BlueskyInterface, Staged)
 from ophyd.sim import NullStatus  # TODO: remove after complete/collect are defined
+from ophyd.signal import set_and_wait
 
 from ..handlers import Xspress3HDF5Handler
 from ..handlers.xspress3 import XRF_DATA_KEY
@@ -206,6 +207,43 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
             desc[key] = spec_desc
 
         return desc
+
+    def warmup(self):
+        """
+        A convenience method for 'priming' the plugin.  
+        Plugin has to 'see' one acquisiton before it is ready to capture
+        This sets the array size PV's, primarily.
+        NOTE: This overrides the default warmup plugin behavior from:
+                ophyd.areadetector.plugins.HDF5Plugin
+            Swapping "cam" with "settings"
+        Taken from NSLS-II-TES implementaiton
+        """
+        print("warming up the HDF5 plugin...")
+        set_and_wait(self.enable, 1)
+        sigs = OrderedDict([(self.parent.settings.array_callbacks, 1),
+                    (self.parent.settings.image_mode, 'Single'),
+                    (self.parent.settings.trigger_mode, 'Internal'),
+                    # just in case tha acquisition time is set very long...
+                    (self.parent.settings.acquire_time , 1),
+                    #(self.parent.settings.acquire_period, 1),
+                    (self.parent.settings.acquire, 1)])
+
+        original_vals = {sig: sig.get() for sig in sigs}
+
+        for sig, val in sigs.item():
+            ttime.sleep(0.1) # Being overly cautios here
+            set_and_wait(sig, val)
+
+        ttime.sleep(2)
+
+        # Reset stage signals to original values
+        for sig, val in reversed(list(original_vals.items())):
+            ttime.sleep(0.1) 
+            set_and_wait(sig, val)
+
+        print("done")
+
+
 
 class Xspress3DetectorSettings(CamBase):
     '''Quantum Detectors Xspress3 detector'''
