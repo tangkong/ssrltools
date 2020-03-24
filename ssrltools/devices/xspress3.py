@@ -91,6 +91,7 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
             # as we eat all SIGINT to ensure that cleanup happens in
             # orderly manner.
             while self.capture.get() == 1:
+                logger.warning(f'capture status: {self.capture.get()}')
                 i += 1
                 if (i % 50) == 0:
                     logger.warning('Still capturing data .... waiting.')
