@@ -15,7 +15,7 @@ from bluesky import RunEngine
 RE = RunEngine({})
     
 # install kickers, callbacks
-from ssrltools.callbacks import doc_contents, debugCB
+from ssrltools.callbacks import _doc_contents, _debugCB
 bec = BestEffortCallback()
 bec_UID = RE.subscribe(bec)
 # Debugging callbacks
@@ -51,7 +51,7 @@ dets = [det1, det2]
 
 # ========================================================================
 # Try plotting some stuff
-if False:
+if True:
     print('Attempting LivePlot, basic plotting')    
     RE(scan([det], motor, -5, 5, 10), LivePlot('det', 'motor'))
 
@@ -147,12 +147,3 @@ if False:
     det = DEXdet('simBL:dexela', name='dexela')
 
     RE(count([det]))
-
-if True: 
-    from ssrltools.sim.hitp import per_grid_step_thresh
-    from ssrltools.sim.hitp import SynHiTpDet
-    SynDet = SynHiTpDet('synDet', motor1, motor2)
-
-    from bluesky.plans import grid_scan
-    RE(grid_scan([SynDet], motor1, 1, 10, 10, motor2, 1, 10, 10, True,
-                    per_step=per_grid_step_thresh(11, 6)))

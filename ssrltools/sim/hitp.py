@@ -25,12 +25,13 @@ class SynHiTpStage(Device):
 
     theta = Cpt(SynAxis, prefix=':theta', name='theta')
 
+    # lrF = Cpt()
+
     # range finder
     #height = Cpt(SynAxis, prefix=':height', name='height')
 
     # TODO: Figure out how to access component names within the class 
     # Until then, hard code things I guess
-    motors = [stage_x, stage_y, plate_x, plate_y, theta]
         
     def __init__(self, *args, **kwargs):
         # Default sample location list.  Save all location information

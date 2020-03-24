@@ -48,3 +48,17 @@ def ophyd_to_caproto_to_file(device, savepath=basep):
             for ln in ioc[key]:
                 fp.write(ln)
                 fp.write('\n')
+
+
+def setup_user_metadata():
+    """
+    Set up user metadata via inputs/interactive form.  For use at startup.
+    """
+    md = {}
+    print('Input metadata for current run.  Will be perserved throughout run')
+    username = input('SSRL username: ')
+    proposal = input('SSRL Proposal #: ')
+    
+    md = {'username': username, 'proposal': proposal}
+
+    return md

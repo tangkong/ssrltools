@@ -1,8 +1,29 @@
 from caproto.server import (pvproperty, PVGroup, ioc_arg_parser,
                              run, get_pv_pair_wrapper, SubGroup)
 
+import numpy as np
+from scipy import signal
+
 pvproperty_with_rbv = get_pv_pair_wrapper(setpoint_suffix='',
                                           readback_suffix='_RBV')
+
+def generate_sim_MCA(num_peaks, length):
+    '''
+    Output sample MCA with some noise
+    '''
+    out = np.zeros(length)
+    def gauss(mean, std, length):
+        ''' Quick gaussian distribution function '''
+        x = np.arange(length)
+        return 1/(std * np.sqrt(2*np.pi)) * np.exp(-(x - mean)**2/(2*std**2))
+
+    for _ in range(num_peaks): # Add 3 gaussian peaks
+        std = np.random.randint(40, 60)
+        mean = np.random.randint(60, 4000)
+        out += gauss(mean, std, 4096)
+
+    return out
+
 
 class SSRLXspress3DetectorGroup(PVGroup):
     # configuration_names = pvproperty(name=None, dtype=int)
@@ -113,6 +134,13 @@ class SSRLXspress3DetectorGroup(PVGroup):
         run_flags = pvproperty_with_rbv(name='RUN_FLAGS', dtype=int)
         save_settings = pvproperty(name='SAVE_SETTINGS', dtype=int)
         trigger_signal = pvproperty(name='TRIGGER', dtype=int)
+
+        # acquire is pair setpt/rbv 
+        @acquire.setpoint.putter
+        async def acquire(self, instance, value):
+            #image = generate_sim_MCA(4, 4096)
+            print('acquire triggered, generated sample MCA')
+            await self.parent.parent.hdf5.width.write(4)
 
     settings = SubGroup(Xspress3DetectorSettingsGroup, prefix='')
 
@@ -317,9 +345,9 @@ class SSRLXspress3DetectorGroup(PVGroup):
         pool_used_mem = pvproperty(name='PoolUsedMem', dtype=int, read_only=True)
         port_name = pvproperty(name='PortName_RBV', dtype=str, read_only=True)
         # asyn_pipeline_config = pvproperty(name=None, dtype=int)
-        width = pvproperty(name='ArraySize0_RBV', dtype=int, read_only=True)
-        height = pvproperty(name='ArraySize1_RBV', dtype=int, read_only=True)
-        depth = pvproperty(name='ArraySize2_RBV', dtype=int, read_only=True)
+        width = pvproperty(name='ArraySize0_RBV', dtype=int, read_only=True, value=1)
+        height = pvproperty(name='ArraySize1_RBV', dtype=int, read_only=True, value=1)
+        depth = pvproperty(name='ArraySize2_RBV', dtype=int, read_only=True, value=1)
         
         bayer_pattern = pvproperty(name='BayerPattern_RBV', dtype=int, read_only=True)
         blocking_callbacks = pvproperty_with_rbv(name='BlockingCallbacks', dtype=str)
@@ -331,7 +359,7 @@ class SSRLXspress3DetectorGroup(PVGroup):
 
         dimensions = pvproperty(name='Dimensions_RBV', dtype=int, read_only=True)
         dropped_arrays = pvproperty_with_rbv(name='DroppedArrays', dtype=int)
-        # enable = pvproperty_with_rbv(name='EnableCallbacks', dtype=str)
+        enable = pvproperty_with_rbv(name='EnableCallbacks', dtype=str)
         min_callback_time = pvproperty_with_rbv(name='MinCallbackTime', dtype=int)
         nd_array_address = pvproperty_with_rbv(name='NDArrayAddress', dtype=int)
         nd_array_port = pvproperty_with_rbv(name='NDArrayPort', dtype=int)
@@ -401,6 +429,10 @@ class SSRLXspress3DetectorGroup(PVGroup):
         num_capture_calc_disable = pvproperty(name='NumCapture_CALC.DISA', dtype=int)
 
     hdf5 = SubGroup(Xspress3FileStoreGroup, prefix='HDF5:')
+
+
+
+
 
 if __name__ == '__main__':
     ioc_options, run_options = ioc_arg_parser(
