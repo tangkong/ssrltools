@@ -225,34 +225,40 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
         # Conversion from voltage to distance
         def v2mm(V):
             """ Convert laser range finder V to mm (calib w/ ims motor) """
-            return V*0.004 - 2000.8
+            return V*0.46782
 
         # Iteration parameters
-        thresh = 10.0
+        thresh = 0.01
         step_size = 5.0
         iter_limit = 20
         
-        for thresh_mult in [20, 2]: # two steps, coarse and fine
+        for thresh_mult in [20, 10, 5, 2]: # various steps, coarse and fine
             # Grab initial values
-            yield from bps.mv(horz_motor, point1)
+            yield from bps.mv(horz_motor, point2)
             # If actual epics detector, need to trigger and read?
             # Else can just get value
-            v1 = v2mm(distdet.value())
-            yield from bps.mv(horz_motor, point2)
-            v2 = v2mm(distdet.value())
+            distdet.read()
+            v2 = v2mm(distdet.value)
+            yield from bps.mv(horz_motor, point1)
+            distdet.read()
+            v1 = v2mm(distdet.value)
 
             # Coarse adjustment, move in large steps
             iter_cnt = 0
             while ((np.abs(v2 - v1) > (thresh * thresh_mult)) 
-                    or (iter_cnt > iter_limit)):
+                    and (iter_cnt < iter_limit)):
 
-                if v1 > v2: # if motor farther from range finder
-                    yield from bps.mvr(dist_motor, step_size*thresh_mult/2) # raise motor
+                if v1 > v2: # if motor closer to range finder
+                    # LRF signal increases as pico pushes +z
+                    # LRF measures height from bottom
+                    yield from bps.mvr(dist_motor, -step_size*thresh_mult/2) # raise motor
                 else: 
-                    yield from bps.mvr(dist_motor, -step_size*thresh_mult/2)
+                    yield from bps.mvr(dist_motor, step_size*thresh_mult/2)
 
                 # re-measure points for iteration condition
                 yield from bps.mv(horz_motor, point1)
-                v1 = v2mm(distdet.value())
+                distdet.read()
+                v1 = v2mm(distdet.value)
 
                 iter_cnt += 1
+            print(f'{iter_cnt} iters for thresh_mult={thresh_mult}')
