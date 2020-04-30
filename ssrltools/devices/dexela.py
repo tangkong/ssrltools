@@ -31,23 +31,8 @@ from ophyd.areadetector import TIFFPlugin
 class DexelaTiffPlugin(TIFFPlugin, FileStoreTIFFIterativeWrite):
     pass
 
-class DexelaDet15(SingleTrigger, DexelaDetector):
+class SSRLDexelaDet(SingleTrigger, DexelaDetector):
     """
-    Final class for Dexela Detector on SSRL BL 1-5
-
-    det = DexelaDet15(prefix)
+    Contains main PV's
     """
-    # DexelaDetector from ophyd pulls in all Dexela specific PV's
-    write_path = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\fstore\\tmpFileStore\\'
-    # In case where TIFF plugin is being used
-    tiff = Cpt(DexelaTiffPlugin, 'TIFF1:',
-                        write_path_template=write_path,
-                        read_path_template=write_path)
-    # Else there should be an NDArrayData PV
-    image = Cpt(EpicsSignal, 'ArrayData')
-
-    def trigger(self):
-        super().trigger()
-        
-    # Could add more attributes to file_plugin
-    # could add stage behavior
+    pass

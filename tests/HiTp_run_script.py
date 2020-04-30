@@ -18,8 +18,7 @@ print(f'laser range finder: {lrf.value}')
 ## Basic alignment (table height)
 
 ## Calibration (LaB6, range finder)
-print()
-RE(b)
+
 
 # Load sample
 
@@ -27,8 +26,9 @@ RE(b)
 ## print out heights of each location
 
 ## Leveling plan
-level_stage_single(lrf, stage.pico1)
-level_stage_single(lrf, stage.pico2)
+RE(bps.mv(stage.center))
+level_stage_single(lrf, stage.plate_x, stage.stage_x, -85, 85)
+level_stage_single(lrf, stage.plate_y, stage.stage_y, 58, -58)
 
 
 # Confirm sample locations
