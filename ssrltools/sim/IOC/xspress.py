@@ -1,3 +1,13 @@
+'''
+Xspress3 caproto group setup
+    # Functionality items.  
+    # TODO: Initialize array MCA 
+    #   What does MCA look like?
+    # TODO: Acquire triggering image refresh -> Update ROIs and other info
+    # TODO: Deal with filestore plugin, rudimentary operation 
+    #   Write file with MCA with every trigger
+'''
+
 from caproto.server import (pvproperty, PVGroup, ioc_arg_parser,
                              run, get_pv_pair_wrapper, SubGroup)
 
@@ -24,7 +34,6 @@ def generate_sim_MCA(num_peaks, length):
 
     return out
 
-
 class SSRLXspress3DetectorGroup(PVGroup):
     # configuration_names = pvproperty(name=None, dtype=int)
 
@@ -41,7 +50,7 @@ class SSRLXspress3DetectorGroup(PVGroup):
         pool_used_buffers = pvproperty(name='PoolUsedBuffers', dtype=int, read_only=True)
         pool_used_mem = pvproperty(name='PoolUsedMem', dtype=int, read_only=True)
         port_name = pvproperty(name='PortName_RBV', dtype=str, read_only=True)
-        acquire = pvproperty_with_rbv(name='Acquire', dtype=int)
+        acquire = pvproperty_with_rbv(name='Acquire', dtype=int)    
         acquire_period = pvproperty_with_rbv(name='AcquirePeriod', dtype=int)
         acquire_time = pvproperty_with_rbv(name='AcquireTime', dtype=int)
         array_callbacks = pvproperty_with_rbv(name='ArrayCallbacks', dtype=int)
@@ -135,14 +144,20 @@ class SSRLXspress3DetectorGroup(PVGroup):
         save_settings = pvproperty(name='SAVE_SETTINGS', dtype=int)
         trigger_signal = pvproperty(name='TRIGGER', dtype=int)
 
-        # acquire is pair setpt/rbv 
+        # acquire is pair setpt/rbv, need to watch the setpoint part
         @acquire.setpoint.putter
         async def acquire(self, instance, value):
-            #image = generate_sim_MCA(4, 4096)
+            image = generate_sim_MCA(4, 4096)
             print('acquire triggered, generated sample MCA')
+            # Can navigate out of subgroup into other subgroups
             await self.parent.parent.hdf5.width.write(4)
 
     settings = SubGroup(Xspress3DetectorSettingsGroup, prefix='')
+
+    @settings.acquire.startup
+    async def settings(self, instance, async_lib):
+        #instance.
+        print(instance.fields['Acquire'])
 
     # external_trig = pvproperty(name=None, dtype=int)
     # total_points = pvproperty(name=None, dtype=int)
@@ -195,7 +210,6 @@ class SSRLXspress3DetectorGroup(PVGroup):
         unique_id = pvproperty(name='UniqueId_RBV', dtype=int, read_only=True)
 
     roi_data = SubGroup(PluginBaseGroup, prefix='ROIDATA:')
-
 
     class Xspress3ChannelGroup(PVGroup):
         # configuration_names = pvproperty(name=None, dtype=int)
@@ -330,7 +344,6 @@ class SSRLXspress3DetectorGroup(PVGroup):
     channel1 = SubGroup(Xspress3ChannelGroup, prefix='C1_')
     channel2 = SubGroup(Xspress3ChannelGroup, prefix='C2_')
 
-
     class Xspress3FileStoreGroup(PVGroup):
         # configuration_names = pvproperty(name=None, dtype=int)
         array_counter = pvproperty_with_rbv(name='ArrayCounter', dtype=int)
@@ -430,7 +443,7 @@ class SSRLXspress3DetectorGroup(PVGroup):
 
     hdf5 = SubGroup(Xspress3FileStoreGroup, prefix='HDF5:')
 
-
+    
 
 
 

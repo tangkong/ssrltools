@@ -3,16 +3,16 @@ Classes for use in simulated caproto beamline
 Classes here extend PV groups and add functionality
 
 
-
 '''
 import time
 import random
 
 from caproto import ChannelType
-from caproto.server import pvproperty, PVGroup
+from caproto.server import pvproperty, PVGroup, get_pv_pair_wrapper
 from caproto.server.records import MotorFields, register_record
 
-from ssrltools.sim.IOC.xspress import SSRLXspress3DetectorGroup
+pvproperty_with_rbv = get_pv_pair_wrapper(setpoint_suffix='',
+                                          readback_suffix='_RBV')
 
 @register_record
 class MotorFieldsSSRL(MotorFields):
@@ -35,16 +35,27 @@ class MotorFieldsSSRL(MotorFields):
         await self.dial_readback_value.write(pos, timestamp=timestamp)
         await self.raw_readback_value.write(int(pos * 100000.), 
                                             timestamp=timestamp) 
-    
-class Xspress3SSRL(SSRLXspress3DetectorGroup):
-    '''
-    Define behavior for Xspress3 simulated detector
-    Features:---------------
-    * Defining image dimensions on startup (normally requires a trigger)
-    * Generation of MCA
-    * Calculation of channel info from MCA with data from bin PV's
-    * 
-    '''
-    pass
-    # acquire = pvproperty(name='Acquire', dtype=int)
 
+class IMSMotorsSSRL(PVGroup):
+    '''
+    Group for IMS motor IOC
+    '''
+    # Define records, try custom motor record
+    stagex = pvproperty(value=0.0, mock_record='SSRL_motor', name='MOTOR1')
+    stagey = pvproperty(value=0.0, mock_record='SSRL_motor', name='MOTOR2')
+    stagez = pvproperty(value=0.0, mock_record='SSRL_motor', name='MOTOR3')
+    stageth = pvproperty(value=0.0, mock_record='SSRL_motor', name='MOTOR4')
+
+    # Functionality items
+    # TODO: Initialize values for (limits, position, velo, accl)
+    # TODO: Update of RBV with setpoint update
+    # TODO: 
+
+    @stagex.startup
+    async def stagex(self, instance, async_lib):
+        # Could initialize PV values here.  
+        await instance.write(9)
+        await instance.fields['VELO'].write(1)
+        print(f'on startup, write {instance.value} to stagex')
+        print('velocity: {}'.format(self.stagex.fields['VELO'].value)) 
+        ## ???? Why doesn't f-string work
