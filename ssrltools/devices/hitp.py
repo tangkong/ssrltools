@@ -201,3 +201,5 @@ class SynHitp(HiTpStage):
 
     # Laser Range Finder
     lrf = Cpt(SynAxis, prefix=':RIO.AI0', name='lrf')
+
+    
