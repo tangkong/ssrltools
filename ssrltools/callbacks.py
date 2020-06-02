@@ -10,6 +10,8 @@ from bluesky.callbacks import CallbackBase
 
 class _debugCB(CallbackBase):
     """For debugging documents.  Spits everything to console.
+    Need to instantiate before subscribing of inserting into RunEngine
+    RE(count([det]), _debugCB())
     """
     def start(self, doc):
         print('>>> start of run <<<  \n')
