@@ -151,3 +151,9 @@ def _per_grid_step_thresh(threshold, radius):
             yield from bps.one_nd_step(detectors, step, pos_cache)
 
     return per_step_fn
+
+
+if __name__ == "__main__":
+    # Figure out way to bring all classes into namespace while opening ipython prompt
+    # List motors/devices/etc 
+    print('main')

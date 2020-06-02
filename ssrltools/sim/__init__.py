@@ -9,7 +9,7 @@ import numpy as np
 import random
 
 from ophyd import Signal
-from ophyd.sim import SynSignal #reads namespace of simulated motors, detectors
+from ophyd.sim import SynSignal
 
 import tifffile
 import fabio
@@ -195,7 +195,7 @@ class ArraySynGauss(ArraySynSignal):
         
         super().__init__(func=func, name=name, **kwargs)
         # Sets self.value to func evaluation. 
-        
+    
 class SynImageDetector(ArraySynSignal):
     """
     Simulates an area detector by returning an image from file.  

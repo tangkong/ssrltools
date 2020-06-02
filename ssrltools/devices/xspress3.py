@@ -561,7 +561,7 @@ class XspressTrigger(BlueskyInterface):
         self._abs_trigger_count += 1
         return self._status
 
-class Xspress3Detector(DetectorBase):
+class Xspress3Detector(DetectorBase): # XspressTrigger also subclassed normally
     settings = Cpt(Xspress3DetectorSettings, '')
 
     external_trig = Cpt(Signal, value=False,
