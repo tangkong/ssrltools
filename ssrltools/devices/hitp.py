@@ -183,7 +183,7 @@ class HiTpStage(Device):
 
 class SynHitp(HiTpStage):
     '''
-    overwrite with synthetic signals
+    Synthetic stage with synthetic signals as components
 
     instantiate in same way as real stage
     fake = SynHitp('bl00:', name='fake')
