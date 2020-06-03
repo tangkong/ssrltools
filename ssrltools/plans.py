@@ -217,9 +217,6 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             level_stage_single(stage.height, stage.plate_x, stage.stage_x,
                                             pt1, pt2)
             stage.set_all_vert_theta
-
-        Currently distance detector is a laser range finder with simple
-        rbv, so more complicated calls are not necessary. 
         """
 
         # Conversion from voltage to distance
@@ -238,10 +235,10 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             # If actual epics detector, need to trigger and read?
             # Else can just get value
             distdet.read()
-            v2 = v2mm(distdet.value)
+            v2 = v2mm(distdet.read()[distdet.name]['value'])
             yield from bps.mv(horz_motor, point1)
             distdet.read()
-            v1 = v2mm(distdet.value)
+            v1 = v2mm(distdet.read()[distdet.name]['value'])
 
             # Coarse adjustment, move in large steps
             iter_cnt = 0
@@ -258,7 +255,7 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
                 # re-measure points for iteration condition
                 yield from bps.mv(horz_motor, point1)
                 distdet.read()
-                v1 = v2mm(distdet.value)
+                v1 = v2mm(distdet.read()[distdet.name]['value'])
 
                 iter_cnt += 1
             print(f'{iter_cnt} iters for thresh_mult={thresh_mult}')
