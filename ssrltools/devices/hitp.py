@@ -74,9 +74,6 @@ class HiTpStage(Device):
 
     theta = Cpt(EpicsMotor, 'IMS:MOTOR1')
 
-    # Laser Range Finder
-    lrf = Cpt(EpicsSignalRO, 'RIO.AI0')
-
     # TODO: Figure out how to access component names within the class 
     # Until then, hard code things I guess
         
@@ -180,26 +177,5 @@ class HiTpStage(Device):
 
             return result
 
-
-class SynHitp(HiTpStage):
-    '''
-    Synthetic stage with synthetic signals as components
-
-    instantiate in same way as real stage
-    fake = SynHitp('bl00:', name='fake')
-    '''
-
-    #stage x, y
-    stage_x = Cpt(SynAxis, prefix=':X', name='stage_x', kind='hinted')
-    stage_y = Cpt(SynAxis, prefix=':Y', name='stage_y', kind='hinted')
-
-    # plate vert adjust motor 1, 2
-    plate_x = Cpt(SynAxis, prefix=':pY', name='plate_x')
-    plate_y = Cpt(SynAxis, prefix=':pX', name='plate_y')
-
-    theta = Cpt(SynAxis, prefix=':theta', name='theta')
-
-    # Laser Range Finder
-    lrf = Cpt(SynAxis, prefix=':RIO.AI0', name='lrf')
-
-    
+# Laser Range Finder
+lrf = EpicsSignalRO('BL00:RIO.AI0', name='lrf')
