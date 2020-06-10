@@ -90,6 +90,7 @@ class HiTpStage(Device):
         for i in range(len(loc177[0])):
             self.sample_locs[i] = { 'stage_x': loc177[0, i],
                                     'stage_y': loc177[1, i],
+                                    'stage_z': 0,
                                     'plate_x': 0, #self.plate_x.position,
                                     'plate_y': 0, #self.plate_y.position,
                                     'theta':   0 #self.theta.position
@@ -97,6 +98,7 @@ class HiTpStage(Device):
         
         self.center = { 'stage_x': 0,
                         'stage_y': 0,
+                        'stage_z': 0,
                         'plate_x': 0, #self.plate_x.position,
                         'plate_y': 0, #self.plate_y.position,
                         'theta':   0 #self.theta.position
@@ -112,6 +114,7 @@ class HiTpStage(Device):
         """
         self.sample_locs[index] = { 'stage_x': self.stage_x.position,
                                     'stage_y': self.stage_y.position,
+                                    'stage_z': self.stage_z.position,
                                     'plate_x': self.plate_x.position,
                                     'plate_y': self.plate_y.position,
                                     'theta':   self.theta.position
@@ -126,6 +129,7 @@ class HiTpStage(Device):
             self.sample_locs[i]['theta'] = self.theta.position
             self.sample_locs[i]['plate_x'] = self.plate_x.position
             self.sample_locs[i]['plate_y'] = self.plate_y.position
+            self.sample_locs[i]['stage_z'] = self.stage_z.position
 
 
     def sample_loc_list(self, index=None):
