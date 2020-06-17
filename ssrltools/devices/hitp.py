@@ -148,14 +148,31 @@ class HiTpStage(Device):
         """
         result = []
 
-        if not index: # Return all sample locations
+        if index == 'center':
+            for key, val in self.center.items():
+                result.append(getattr(self, key)) # grab motor instance
+                result.append(val) # return value
+
+            return result
+
+        else: # Return all sample locations or given indices
             loc_lists = {}
             for name in self.component_names:
                 loc_lists[name] = []
 
-            for pos in self.sample_locs.values():
-                for motor in pos.keys():
-                    loc_lists[motor].append(pos[motor])
+            if not index: # Return all sample locs
+                for pos in self.sample_locs.values():
+                    for motor in pos.keys():
+                        loc_lists[motor].append(pos[motor])
+            elif isinstance(index, (int, list)):
+                if type(index) is int:
+                    indices = [index]
+                else: 
+                    indices = list(index)
+                    
+                for i in indices:
+                    for motor in self.sample_locs[i].keys():
+                        loc_lists[motor].append(self.sample_locs[i][motor])
 
             # format as * unpackable args
             for name in self.component_names:
@@ -164,22 +181,19 @@ class HiTpStage(Device):
 
             return result
 
-        elif index is 'center':
-            for key, val in self.center.items():
-                result.append(getattr(self, key)) # grab motor instance
-                result.append(val) # return value
+        
 
-            return result
+        # elif isinstance(index, (int, list)): 
+        #     # return locations from chosen indexes.  Also catches int case
+        #     indices = list(index)
+        #     for i in indices:
+        #         for key, val in self.sample_locs[i].items():
+        #             result.append(getattr(self, key))
+        #             result.append(val)
 
-        elif isinstance(index, (int, list)): 
-            # return locations from chosen indexes.  Also catches int case
-            indices = list(index)
-            for i in indices:
-                for key, val in self.sample_locs[i].items():
-                    result.append(getattr(self, key))
-                    result.append(val)
+        #     return result
 
-            return result
+stage = HiTpStage('simBL', name='HS')
 
 # Laser Range Finder
 lrf = EpicsSignalRO('BL00:RIO.AI0', name='lrf')
