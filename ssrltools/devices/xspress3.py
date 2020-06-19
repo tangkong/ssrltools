@@ -208,6 +208,12 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
 
         return desc
 
+    def collect_asset_docs(self):
+        items = list(self._asset_docs_cache)
+        self._asset_docs_cache.clear()
+        for item in items:
+            yield item
+
     def warmup(self):
         """
         A convenience method for 'priming' the plugin.  
@@ -242,8 +248,6 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
             set_and_wait(sig, val)
 
         print("done")
-
-
 
 class Xspress3DetectorSettings(CamBase):
     '''Quantum Detectors Xspress3 detector'''
