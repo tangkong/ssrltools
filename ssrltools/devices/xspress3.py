@@ -134,17 +134,19 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
         self.stage_sigs.pop(self.num_capture, None)
         self.stage_sigs.pop(self.settings.num_images, None)
         self.stage_sigs[self.num_capture_calc_disable] = 1
-
+        capture_num = total_capture
         if ext_trig:
             logger.debug('Setting up external triggering')
             self.stage_sigs[self.settings.trigger_mode] = 'TTL Veto Only'
             self.stage_sigs[self.settings.num_images] = total_capture
+            capture_num = total_capture
         else:
             logger.debug('Setting up internal triggering')
             # self.settings.trigger_mode.put('Internal')
             # self.settings.num_images.put(1)
             self.stage_sigs[self.settings.trigger_mode] = 'Internal'
             self.stage_sigs[self.settings.num_images] = spec_per_point
+            capture_num = spec_per_point
 
         self.stage_sigs[self.auto_save] = 'No'
         logger.debug('Configuring other filestore stuff')
@@ -161,7 +163,7 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
         # this must be set after self.settings.num_images because at the Epics
         # layer  there is a helpful link that sets this equal to that (but
         # not the other way)
-        self.stage_sigs[self.num_capture] = total_capture
+        self.stage_sigs[self.num_capture] = capture_num
 
         # actually apply the stage_sigs
         ret = super().stage()
@@ -208,6 +210,12 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
 
         return desc
 
+    def collect_asset_docs(self):
+        items = list(self._asset_docs_cache)
+        self._asset_docs_cache.clear()
+        for item in items:
+            yield item
+
     def warmup(self):
         """
         A convenience method for 'priming' the plugin.  
@@ -242,8 +250,6 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
             set_and_wait(sig, val)
 
         print("done")
-
-
 
 class Xspress3DetectorSettings(CamBase):
     '''Quantum Detectors Xspress3 detector'''
