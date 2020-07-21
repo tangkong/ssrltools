@@ -12,65 +12,6 @@ from ophyd.signal import EpicsSignal, EpicsSignalBase
 from ophyd.areadetector.filestore_mixins import (resource_factory, 
                                             FileStoreTIFFIterativeWrite)
 
-class ArraySignal(EpicsSignalBase):
-    def __init__(self, read_pv, **kwargs):
-        super().__init__(read_pv, **kwargs)
-        cl = self.cl
-        base_pv, _ = read_pv.split(':', maxsplit=1)
-        self._size_pv = cl.get_pv( 
-                            ':'.join((base_pv,'ArraySize_RBV')))
-        self._last_ret = None
-        self._asset_docs_cache = []
-
-    def trigger(self):
-        tmpRoot = 'C:\\Users\\roberttk\\Desktop\\SLAC_RA\\bluesky-dev\\ssrltools\\fstore'
-        tmpPath = '\\tmp'
-        os.makedirs(tmpRoot+tmpPath, exist_ok=True)
-        st = super().trigger() # re-evaluates self._func, puts into value
-        # Returns NullType
-        ret = super().read()    # Signal.read() exists, not SynSignal.read()
-        # But using Signal.read() does not allow uid's to be passed into mem.
-        val = ret[self.name]['value']
-        
-        resource, datum_factory = resource_factory(
-                spec='npy',
-                root=tmpRoot,
-                resource_path=tmpRoot + f'\\tmp\\{uuid.uuid4()}.npy',
-                resource_kwargs={},
-                path_semantics='windows')
-        datum = datum_factory({})
-        
-        self._asset_docs_cache.append(('resource', resource))
-        self._asset_docs_cache.append(('datum', datum))
-        fpath = Path(resource['root']) / resource['resource_path']
-        np.save(fpath, val)
-        
-        # replace 'value' in read dict with some datum id
-        ret[self.name]['value'] = datum['datum_id']
-        self._last_ret = ret
-        return st
-    
-    def describe(self):
-        ret = super().describe()
-        ret[self.name]['shape'] = [int(k)
-                                   for k in
-                                   self._size_pv.get()]
-        ret[self.name]['external'] = 'FILESTORE:'
-        del ret[self.name]['upper_ctrl_limit']
-        del ret[self.name]['lower_ctrl_limit']
-        return ret
-
-    def read(self):
-        if self._last_ret is None:
-            raise Exception('read before being triggered')
-        return self._last_ret
-
-    def collect_asset_docs(self):
-        items = list(self._asset_docs_cache)
-        self._asset_docs_cache.clear()
-        for item in items:
-            yield item
-
 class ShutterBase(Device):
     """
     Base class for all shutter type devices

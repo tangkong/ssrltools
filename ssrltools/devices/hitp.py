@@ -53,7 +53,6 @@ def gen_wafer_locs(shape='circle', radius=10):
     else:
         return x, y
 
-
 class HiTpStage(Device):
     """
     Combined class for HiTp stage.  

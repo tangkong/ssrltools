@@ -18,7 +18,7 @@ from ophyd import (Signal, EpicsSignal, EpicsSignalRO, DerivedSignal,
 from ophyd import (Device, Component as Cpt, FormattedComponent as FC,
                    DynamicDeviceComponent as DDC)
 from ophyd.areadetector.filestore_mixins import FileStorePluginBase
-from ophyd.areadetector.plugins import HDF5Plugin, PluginBase
+from ophyd.areadetector.plugins import HDF5Plugin
 from ophyd.areadetector import ADBase
 from ophyd.device import (BlueskyInterface, Staged)
 from ophyd.sim import NullStatus  # TODO: remove after complete/collect are defined
@@ -180,7 +180,7 @@ class Xspress3FileStore(FileStorePluginBase, HDF5Plugin):
         self._generate_resource({})
         self._filestore_res = self._asset_docs_cache[-1][-1]
 
-        # this gets auto turned off at the end
+        # this gets auto turned off at the end.  But probably only with stream...
         self.capture.put(1)
 
         # Xspress3 needs a bit of time to configure itself...

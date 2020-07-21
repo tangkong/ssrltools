@@ -83,6 +83,9 @@ def meshcirc(detectors, motor1, s1, f1, int1, mot2, s2, f2, int2,
     Scan points in a mesh, including only coordinates inside the radius
     Hooks bluesky.plans.grid_scan
     motor1: 
+    s1 = start
+    f = end
+    int = number
     """
     # Verification (check non-negative, motors are motors, non-zero steps?)
     # Basic plan logic
