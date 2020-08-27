@@ -13,10 +13,10 @@ import uuid
 import threading
 
 from ophyd import Device, Component as Cpt, DeviceStatus, ADComponent as ADCpt
-from ophyd import SignalRO, CamBase
+from ophyd import CamBase
 from ophyd import AreaDetector, SingleTrigger
 
-from ophyd.signal import EpicsSignal, EpicsSignalBase
+from ophyd.signal import SignalRO, EpicsSignal, EpicsSignalBase
 from ophyd.areadetector import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.areadetector.detectors import (DetectorBase, DexelaDetector, 
                                             PilatusDetector, MarCCDDetector)
