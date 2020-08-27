@@ -2,6 +2,8 @@
 HiTp stage device.  Should be deployment ready to permit happi instantiation.
 
 Contains devices specific to the high-throughput WAXS implementation on 1-5
+
+DEPRICATED, simplified in 1-5 profile
 '''
 import numpy as np
 

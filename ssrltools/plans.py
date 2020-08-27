@@ -219,7 +219,6 @@ def level_stage_single(distdet, dist_motor, horz_motor, point1, point2):
             bps.mv(stage.center)
             level_stage_single(stage.height, stage.plate_x, stage.stage_x,
                                             pt1, pt2)
-            stage.set_all_vert_theta
         """
 
         # Conversion from voltage to distance
