@@ -18,7 +18,7 @@ from ophyd import (Signal, EpicsSignal, EpicsSignalRO, DerivedSignal,
 from ophyd import (Device, Component as Cpt, FormattedComponent as FC,
                    DynamicDeviceComponent as DDC)
 from ophyd.areadetector.filestore_mixins import FileStorePluginBase
-from ophyd.areadetector.plugins import HDF5Plugin
+from ophyd.areadetector.plugins import HDF5Plugin, PluginBase
 from ophyd.areadetector import ADBase
 from ophyd.device import (BlueskyInterface, Staged)
 from ophyd.sim import NullStatus  # TODO: remove after complete/collect are defined
