@@ -3,12 +3,7 @@ Devices (ohpyd) for use on SSRL beamlines running Bluesky
 
 AREA DETECTOR SUPPORT
 
-DETECTOR SUPPORT
-
-MOTORS, POSITIONERS, AXES, ...
-
-SHUTTERS
-
+DEXELA
 
 """
 import os
@@ -17,13 +12,14 @@ import numpy as np
 import uuid
 import threading
 
-from ophyd import Device, Component as Cpt, DeviceStatus
+from ophyd import Device, Component as Cpt, DeviceStatus, ADComponent as ADCpt
 from ophyd import SignalRO, CamBase
 from ophyd import AreaDetector, SingleTrigger
 
 from ophyd.signal import EpicsSignal, EpicsSignalBase
-from ophyd.areadetector import cam, (ADComponent as ADCpt), (EpicsSignalWithRBV as SignalWithRBV), 
-from ophyd.areadetector.detectors import DetectorBase, DexelaDetector
+from ophyd.areadetector import EpicsSignalWithRBV as SignalWithRBV
+from ophyd.areadetector.detectors import (DetectorBase, DexelaDetector, 
+                                            PilatusDetector, MarCCDDetector)
 from ophyd.areadetector.filestore_mixins import (resource_factory, 
                                             FileStoreTIFFIterativeWrite)
 from ophyd.areadetector import TIFFPlugin
@@ -62,7 +58,38 @@ class DexelaDet15(SSRLDexelaDet):
                        path_semantics='windows')
     # Else there should be an NDArrayData PV
     image = Cpt(EpicsSignal, 'IMAGE1:ArrayData')
-    highest_pixel = Cpt(EpicsSignal, 'HighestPixel')
+    highest_pixel = Cpt(EpicsSignal, 'HighestPixel', labels=())
 
     # Could add more attributes to file_plugin
     # could add stage behavior, maybe to coerce pv's?
+
+
+class PilatusTiffPlugin(TIFFPlugin, FileStoreTIFFIterativeWrite):
+    """PilatusTiffPlugin... currently identical to Dexela. 
+    """
+    pass
+
+class PilatusDet15(SingleTrigger, PilatusDetector):
+    """PilatusDet15 
+    det = PilatusDet15(prefix, name='name', read_attrs=['tiff'])
+    """
+    # file write path
+    write_path = 'E:\\pilatus_images'
+
+    tiff = Cpt(PilatusTiffPlugin, 'TIFF:', 
+                write_path_template=write_path,
+                read_path_template='/pilatus_images/',
+                path_semantics='windows')
+                
+
+class MarCCDDet15(SingleTrigger, MarCCDDetector):
+    """MarCCDDet15 
+    det = MarCCDDet15(prefix, name='name', read_attrs=['tiff'])
+    """
+    # file write path
+    write_path = 'E:\\MarCCD_images'
+
+    tiff = Cpt(DexelaTiffPlugin, 'TIFF:', 
+                write_path_template=write_path,
+                read_path_template='/MarCCD_images/',
+                path_semantics='windows')
