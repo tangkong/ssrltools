@@ -22,7 +22,7 @@ from ophyd.areadetector.detectors import (DetectorBase, DexelaDetector,
                                             PilatusDetector, MarCCDDetector)
 from ophyd.areadetector.filestore_mixins import (resource_factory, 
                                             FileStoreTIFFIterativeWrite)
-from ophyd.areadetector import TIFFPlugin
+from ophyd.areadetector import TIFFPlugin, cam
 
 class DexelaTiffPlugin(TIFFPlugin, FileStoreTIFFIterativeWrite):
     pass
