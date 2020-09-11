@@ -1,5 +1,6 @@
 fstore/
 notes/
+export/
 __pycache__/
 .vscode/
 ssrltools/__pycache__/
