@@ -25,6 +25,7 @@ from ophyd.areadetector.filestore_mixins import (resource_factory,
                                             FileStoreTIFFIterativeWrite,
                                             FileStorePluginBase)
 from ophyd.areadetector import TIFFPlugin, cam
+from ophyd.utils import enum
 
 class DexelaTiffPlugin(TIFFPlugin, FileStoreTIFFIterativeWrite):
     pass
