@@ -16,6 +16,7 @@ from ophyd import Device, Component as Cpt, DeviceStatus, ADComponent as ADCpt
 from ophyd import CamBase, ADBase
 from ophyd import AreaDetector, SingleTrigger
 
+from ophyd.device import GenerateDatumInterface
 from ophyd.signal import SignalRO, EpicsSignal, EpicsSignalBase, Signal
 from ophyd.areadetector import EpicsSignalWithRBV as SignalWithRBV
 from ophyd.areadetector.detectors import (DetectorBase, DexelaDetector, 
