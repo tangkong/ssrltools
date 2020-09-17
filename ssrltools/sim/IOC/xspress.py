@@ -154,10 +154,10 @@ class SSRLXspress3DetectorGroup(PVGroup):
 
     settings = SubGroup(Xspress3DetectorSettingsGroup, prefix='')
 
-    @settings.acquire.startup
-    async def settings(self, instance, async_lib):
-        #instance.
-        print(instance.fields['Acquire'])
+    # @settings.acquire.startup
+    # async def settings(self, instance, async_lib):
+    #     #instance.
+    #     print(instance.fields['Acquire'])
 
     # external_trig = pvproperty(name=None, dtype=int)
     # total_points = pvproperty(name=None, dtype=int)
