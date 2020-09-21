@@ -113,6 +113,72 @@ def meshcirc(detectors, motor1, s1, f1, int1, mot2, s2, f2, int2,
     return (yield from bp.grid_scan(detectors, *motor_args, 
                                     per_step=per_step_fn, md=_md))
 
+def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2, 
+            radius, pin=None, partial=0, md=None):
+    """
+    Scan points in a mesh, including only coordinates inside the radius.
+    Grid is aligned inside the circular boundary based on pin variable. If pin 
+    argument is not provided, take the current positions of motor1, motor2 to be
+    on a sample. 
+
+    Currently has no way of correcting for rotation of grid.
+
+    Hooks bluesky.plans.grid_scan
+    motor1: 
+    s1 = start 
+    f1 = end
+    int2 = spacing between points along motor1 axis
+
+    motor2: 
+    s2 = start 
+    f2 = end
+    int2 = spacing between points along motor1 axis
+
+    radius = radius from the center point (f1-s1, f2-s2)
+    """
+    # Verification (check non-negative, motors are motors, non-zero steps?)
+    # Basic plan logic
+    ## Define new bounds
+    if not pin: # no pinning tuple provided
+        pin = (mot1.position, mot2.position) 
+
+    ## subtract fraction of interval to account for edges
+    s1_new = np.arange(pin[0], s1-int1/2, -int1)[-1]
+    f1_new = np.arange(pin[0], f1+int1/2, int1)[-1]
+
+    s2_new = np.arange(pin[1], s2-int2/2, -int2)[-1]
+    f2_new = np.arange(pin[1], f2+int2/2, int2)[-1]
+
+    ## add half of interval to include endpoints if interval is perfect
+    num1 = len(np.arange(s1_new, f1_new+int1/2, int1))
+    num2 = len(np.arange(s2_new, f2_new+int2/2, int2))
+    
+    center = ((f1-s1), (f2-s2))
+
+    motor_args = list([mot1, s1_new, f1_new, num1, 
+                        mot2, s2_new, f2_new, num2, False])
+
+    # metadata addition
+    _md = {'radius': radius}
+    _md.update(md or {})
+
+    # inject logic via per_step 
+    def per_step_fn(detectors, step, pos_cache):
+        """
+        has signature of bps.one_nd_step, but with added logic of skipping 
+        a point if it is outside of provided radius
+        """
+        vals = list(step.values())
+        pos_rad = sum([(x-y)**2 for x, y in zip(vals, center)]) # calculate radius^2
+        pt_past_radius = (pos_rad > radius*radius)
+        if pt_past_radius: # condition 
+            pass
+        else: # run normal scan
+            yield from bps.one_nd_step(detectors, step, pos_cache)
+        
+    # plan logic
+    return (yield from bp.grid_scan(detectors, *motor_args, 
+                                    per_step=per_step_fn, md=_md))
 
 def nscan(detectors, *motor_sets, num=11, per_step=None, md=None):
     """
