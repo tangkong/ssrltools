@@ -124,6 +124,8 @@ def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2,
     Currently has no way of correcting for rotation of grid.
 
     Hooks bluesky.plans.grid_scan
+    detectors: list of detectors to count at each point
+
     motor1: 
     s1 = start 
     f1 = end
@@ -153,7 +155,7 @@ def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2,
     num1 = len(np.arange(s1_new, f1_new+int1/2, int1))
     num2 = len(np.arange(s2_new, f2_new+int2/2, int2))
     
-    center = ((f1-s1), (f2-s2))
+    center = (s1+(f1-s1)/2, s2+(f2-s2)/2)
 
     motor_args = list([mot1, s1_new, f1_new, num1, 
                         mot2, s2_new, f2_new, num2, False])
