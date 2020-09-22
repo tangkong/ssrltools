@@ -15,6 +15,7 @@ from bluesky import plan_patterns
 from collections import OrderedDict
 import numpy as np
 import datetime
+import itertools
 import logging
 
 
@@ -114,7 +115,7 @@ def meshcirc(detectors, motor1, s1, f1, int1, mot2, s2, f2, int2,
                                     per_step=per_step_fn, md=_md))
 
 def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2, 
-            radius, pin=None, partial=0, md=None):
+            radius, pin=None, skip=0, md=None):
     """
     Scan points in a mesh, including only coordinates inside the radius.
     Grid is aligned inside the circular boundary based on pin variable. If pin 
@@ -137,6 +138,11 @@ def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2,
     int2 = spacing between points along motor1 axis
 
     radius = radius from the center point (f1-s1, f2-s2)
+
+    pin = location of a sample.  If none provided, assumes current position is 
+    on a sample
+
+    skip = number of points to skip (if restarting a scan)
     """
     # Verification (check non-negative, motors are motors, non-zero steps?)
     # Basic plan logic
@@ -165,22 +171,37 @@ def mesh_grid_circ(detectors, mot1, s1, f1, int1, mot2, s2, f2, int2,
     _md.update(md or {})
 
     # inject logic via per_step 
-    def per_step_fn(detectors, step, pos_cache):
-        """
-        has signature of bps.one_nd_step, but with added logic of skipping 
-        a point if it is outside of provided radius
-        """
-        vals = list(step.values())
-        pos_rad = sum([(x-y)**2 for x, y in zip(vals, center)]) # calculate radius^2
-        pt_past_radius = (pos_rad > radius*radius)
-        if pt_past_radius: # condition 
-            pass
-        else: # run normal scan
-            yield from bps.one_nd_step(detectors, step, pos_cache)
+    class stateful_per_step:
         
-    # plan logic
-    return (yield from bp.grid_scan(detectors, *motor_args, 
-                                    per_step=per_step_fn, md=_md))
+        def __init__(self, skip):
+            self.skip = skip
+            self.cnt = 0
+            print(self.skip, self.cnt)
+
+        def __call__(self, detectors, step, pos_cache):
+            """
+            has signature of bps.one_and_step, but with added logic of skipping 
+            a point if it is outside of provided radius
+            """
+            vals = list(step.values())
+            pos_rad = sum([(x-y)**2 for x, y in zip(vals, center)]) # calculate radius^2
+            pt_past_radius = (pos_rad > radius*radius)
+            if pt_past_radius: # condition 
+                pass
+            else: # run normal scan
+                if self.cnt < self.skip: # if not enough skipped
+                    self.cnt += 1
+                    pass
+                else:
+                    yield from bps.one_nd_step(detectors, step, pos_cache)
+            
+
+    per_stepper = stateful_per_step(skip)
+
+    # Skip points if need
+    newGen = bp.grid_scan(detectors, *motor_args, 
+                            per_step=per_stepper, md=_md)
+    return (yield from newGen)
 
 def nscan(detectors, *motor_sets, num=11, per_step=None, md=None):
     """
